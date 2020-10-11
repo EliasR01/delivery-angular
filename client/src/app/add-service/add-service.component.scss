@@ -1,0 +1,64 @@
+.card-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100vw;
+  :host {
+    height: 100%;
+  }
+}
+.service-card {
+  display: flex;
+  flex-flow: column;
+}
+
+.card-buttons-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 5%;
+  width: 100vw;
+}
+
+.product-card {
+  display: flex;
+  max-height: 50px;
+
+  button {
+    height: 80%;
+    margin: auto;
+  }
+}
+
+.products {
+  margin-top: 15px;
+  width: 90%;
+  height: 60%;
+}
+
+.virtual-scrollbar {
+  width: 100%;
+  height: 50px;
+}
+
+.product-label {
+  label {
+    margin-right: 10px;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
+label {
+  margin-bottom: 5px;
+}
+
+mat-card.mat-card {
+  mat-card-header.mat-card-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    mat-card-title.mat-card-title {
+      color: rgb(3, 156, 207);
+    }
+  }
+}

@@ -1,0 +1,58 @@
+<mat-progress-bar
+  *ngIf="uploadPercent"
+  mode="determinate"
+  value="uploadPercent"
+></mat-progress-bar>
+<mat-card class="card">
+  <form [formGroup]="userForm" class="user-data" (ngSubmit)="update()">
+    <div class="image-wrapper">
+      <img alt="Profile Photo" [src]="imageUrl" (click)="fileInput.click()" />
+      <input
+        #fileInput
+        type="file"
+        class="custom-file-input"
+        accept="image/*"
+        (change)="onChangeFile($event)"
+      />
+    </div>
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput type="text" formControlName="name" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Username</mat-label>
+      <input matInput type="text" formControlName="username" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Current Password</mat-label>
+      <input matInput type="password" formControlName="currentPassword" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>New Password</mat-label>
+      <input matInput type="password" formControlName="password" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Country</mat-label>
+      <input matInput type="text" formControlName="country" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <input matInput type="text" formControlName="type" />
+    </mat-form-field>
+    <button
+      type="submit"
+      mat-button
+      color="accent"
+      [disabled]="!userForm.valid"
+    >
+      Update
+    </button>
+    <button mat-button color="accent" type="button" (click)="back()">
+      Back
+    </button>
+  </form>
+</mat-card>

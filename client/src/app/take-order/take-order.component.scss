@@ -1,0 +1,127 @@
+.container {
+  display: flex;
+  justify-content: space-around;
+  :host {
+    height: 100%;
+  }
+}
+
+.card-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  width: 100%;
+}
+
+mat-card.mat-card {
+  width: 80%;
+  mat-card-title.mat-card-title {
+    color: rgb(3, 156, 207);
+  }
+}
+
+.business-card {
+  display: flex;
+  justify-content: space-between;
+}
+
+.business-information {
+  display: flex;
+  flex-flow: column;
+  justify-content: left;
+  span {
+    margin: 0 1em;
+  }
+}
+
+.business-image {
+  display: flex;
+  justify-content: right;
+  align-items: right;
+  margin: auto;
+  margin-top: 10%;
+  margin-left: 10%;
+
+  img {
+    border-radius: 100%;
+    max-width: 80px;
+    max-height: 80px;
+  }
+}
+
+.products-card {
+  display: flex;
+  justify-content: space-between;
+  flex-flow: row;
+  margin-bottom: 15px;
+}
+
+.product-information {
+  display: flex;
+  flex-flow: column;
+  justify-content: left;
+  align-items: left;
+  margin: auto;
+  span {
+    margin: 4px 0 2px 0;
+  }
+}
+
+.product-selector {
+  display: flex;
+  flex-flow: column;
+  justify-content: right;
+  align-items: right;
+  margin: auto;
+
+  span {
+    margin-top: 10px;
+  }
+}
+
+.amount-input {
+  max-width: 25px;
+  margin: 0;
+  div {
+    padding: 0;
+  }
+}
+.products {
+  margin: 0 1em;
+  margin-top: 15px;
+  width: 90%;
+  height: 170px;
+}
+
+.information {
+  display: flex;
+  flex-flow: column;
+}
+
+.selected-products {
+  width: 90%;
+  display: flex;
+  flex-flow: column;
+  justify-content: left;
+  align-items: left;
+}
+
+.selected-products-scroll {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.card-buttons-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 5%;
+  width: 100vw;
+}
+
+.bill-wrapper {
+  width: 100%;
+  height: 100%;
+}

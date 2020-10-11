@@ -1,0 +1,42 @@
+.bill {
+  width: 30%;
+  margin: auto;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.bill-title {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bill-user-information {
+  width: 100%;
+  display: flex;
+  margin-bottom: 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bill-footer {
+  width: 100%;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: center;
+}
+
+.bill-summary {
+  width: 100%;
+}
+
+.bill-button {
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

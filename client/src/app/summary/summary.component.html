@@ -1,0 +1,76 @@
+<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+<div class="wrapper">
+  <div class="card-wrapper">
+    <mat-card>
+      <div class="user-information">
+        <mat-card-header>
+          <mat-card-title>User Information</mat-card-title>
+        </mat-card-header>
+        <span><b>Name:</b> {{ userData.name }}</span>
+        <span><b>Username:</b> {{ userData.username }}</span>
+        <span><b>email:</b> {{ userData.email }}</span>
+        <span><b>type:</b> {{ userData.type }}</span>
+        <span><b>Country:</b> {{ userData.country }}</span>
+        <span><b>Address:</b> {{ userData.address }}</span>
+        <button mat-button color="accent" (click)="editUserInfo()">Edit</button>
+      </div>
+    </mat-card>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title> Pending Orders </mat-card-title>
+      </mat-card-header>
+      <cdk-virtual-scroll-viewport itemSize="50" class="order-scroll">
+        <div *ngFor="let order of pendingOrders" class="orders">
+          <ul (click)="openOrder(order)" class="order-list">
+            <li>
+              <span><b>Emitted: </b> {{ order.emited }}</span>
+            </li>
+            <span><b>Status: </b> {{ order.status }}</span>
+            <span><b>Destination: </b> {{ order.address }}</span>
+            <span><b>Total Price: </b> {{ order.price }}</span>
+          </ul>
+        </div>
+      </cdk-virtual-scroll-viewport>
+      <div class="order-button">
+        <button
+          *ngIf="isButtonVisible"
+          mat-button
+          color="accent"
+          (click)="newOrder()"
+        >
+          New Order
+        </button>
+      </div>
+    </mat-card>
+  </div>
+  <div class="card-wrapper">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Transaction History</mat-card-title>
+      </mat-card-header>
+      <app-line-chart
+        [allOrders]="allOrdersMap"
+        [pendingOrders]="pendingOrdersMap"
+        [completedOrders]="completedOrdersMap"
+        [chartLabels]="chartLabels"
+      ></app-line-chart>
+    </mat-card>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>All Orders</mat-card-title>
+      </mat-card-header>
+      <cdk-virtual-scroll-viewport itemSize="50" class="order-scroll">
+        <div *ngFor="let order of orders" class="orders">
+          <ul>
+            <li>
+              <span><b>Emitted: </b> {{ order.emited }}</span>
+            </li>
+            <span><b>Status: </b> {{ order.status }}</span>
+            <span><b>Destination: </b> {{ order.address }}</span>
+            <span><b>Total Price: </b> {{ order.price }}</span>
+          </ul>
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </mat-card>
+  </div>
+</div>

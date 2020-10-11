@@ -1,0 +1,52 @@
+<div class="container">
+  <div *ngIf="!takeOrder">
+    <div class="select-container">
+      <mat-card>
+        <form class="take-order-form" [formGroup]="orderForm">
+          <mat-form-field>
+            <mat-label>Type of service</mat-label>
+            <mat-select
+              class="form-select"
+              formControlName="typeService"
+              (selectionChange)="selectType()"
+            >
+              <mat-option
+                *ngFor="let service of typeServices"
+                [value]="service.name"
+              >
+                {{ service.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </mat-card>
+    </div>
+    <div *ngIf="selectedType" class="services-container">
+      <h3>Select service</h3>
+      <div class="services-card-container" fxLayoutGap="10px">
+        <div
+          *ngFor="let service of servicesData"
+          class="services"
+          (click)="onSelectService(service)"
+        >
+          <mat-card class="services-card">
+            <mat-card-header>
+              <mat-card-title>Name</mat-card-title>
+            </mat-card-header>
+            <mat-label>{{ service.name }}</mat-label>
+            <mat-card-header>
+              <mat-card-title>Description</mat-card-title>
+            </mat-card-header>
+            <mat-label>{{ service.description }}</mat-label>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="takeOrder" class="take-order">
+    <app-take-order
+      [orderData]="orderData"
+      (return)="toggleTakeOrder($event)"
+    ></app-take-order>
+  </div>
+</div>

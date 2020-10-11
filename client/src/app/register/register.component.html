@@ -1,0 +1,64 @@
+<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+<div class="wrapper">
+  <div class="image-wrapper">
+    <img mat-card-image [src]="imageUrl" (click)="fileInput.click()" />
+    <input
+      #fileInput
+      type="file"
+      class="file-input"
+      accept="image/*"
+      (change)="onChangeFile($event)"
+    />
+  </div>
+  <h4 class="photo-text" (click)="fileInput.click()">Add profile photo</h4>
+  <form class="input-wrapper" [formGroup]="userForm" (ngSubmit)="register()">
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Username</mat-label>
+      <input matInput formControlName="username" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input matInput type="password" formControlName="password" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Type of User</mat-label>
+      <mat-select formControlName="type">
+        <mat-option *ngFor="let type of types" [value]="type.value">
+          {{ type.viewValue }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Country</mat-label>
+      <input matInput formControlName="country" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Address</mat-label>
+      <input matInput formControlName="address" />
+    </mat-form-field>
+    <div class="button-wrapper">
+      <button
+        type="submit"
+        mat-button
+        color="accent"
+        [disabled]="!userForm.valid"
+      >
+        Register
+      </button>
+      <a routerLink="/login">
+        <button mat-button color="accent">Already have account?</button>
+      </a>
+      <a routerLink="/">
+        <button mat-button color="accent">Back</button>
+      </a>
+    </div>
+  </form>
+</div>

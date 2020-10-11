@@ -1,0 +1,23 @@
+@import "~@angular/material/theming";
+@include mat-core();
+
+$delivery-app-primary: mat-palette($mat-blue, 400, 700, A200);
+$delivery-app-accent: mat-palette($mat-light-green, A400);
+$delivery-app-warn: mat-palette($mat-red);
+
+$delivery-app-theme: mat-light-theme(
+  $delivery-app-primary,
+  $delivery-app-accent,
+  $delivery-app-warn
+);
+
+@include angular-material-theme($delivery-app-theme);
+
+.alternate-theme {
+  $alternate-primary: mat-palette($mat-light-blue);
+  $alternate-accent: mat-palette($mat-yellow, 400);
+
+  $alternate-theme: mat-light-theme($alternate-primary, $alternate-accent);
+
+  @include angular-material-theme($alternate-theme);
+}

@@ -1,0 +1,125 @@
+<div *ngIf="!bill">
+  <form [formGroup]="productForm" class="container">
+    <div class="card-container">
+      <mat-card>
+        <div class="business-card">
+          <div>
+            <mat-card-header>
+              <mat-card-title>Bussiness information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="business-information">
+              <span><b>Name:</b> {{ orderData.user.username }} </span>
+              <span><b>Email:</b> {{ orderData.user.email }} </span>
+              <span><b>Location:</b> {{ orderData.user.country }} </span>
+              <span><b>Address:</b> {{ orderData.user.address }}</span>
+            </mat-card-content>
+          </div>
+          <mat-card-content class="business-image">
+            <img mat-card-image [src]="orderData.user.fileUrl" />
+          </mat-card-content>
+        </div>
+        <div>
+          <mat-card-header>
+            <mat-card-title>Available Products</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <cdk-virtual-scroll-viewport itemSize="50" class="products">
+              <div
+                *ngFor="let product of orderData.products"
+                class="products-card"
+              >
+                <div class="product-information">
+                  <span><b>Product name: </b>{{ product.name }}</span>
+                  <span
+                    ><b>{{ description }}: </b>{{ product.description }}</span
+                  >
+                  <span><b>Price: </b>{{ product.price }}</span>
+                  <span><b>Available: </b>{{ product.stock }}</span>
+                </div>
+                <div class="product-selector">
+                  <span>Amount</span>
+                  <mat-form-field class="amount-input">
+                    <input
+                      matInput
+                      #amount
+                      type="number"
+                      value="0"
+                      min="0"
+                      [max]="product.stock"
+                    />
+                  </mat-form-field>
+                  <mat-checkbox
+                    color="accent"
+                    #checkbox
+                    (change)="addProduct($event, product, amount, checkbox)"
+                  >
+                    Add
+                  </mat-checkbox>
+                </div>
+              </div>
+            </cdk-virtual-scroll-viewport>
+          </mat-card-content>
+        </div>
+      </mat-card>
+    </div>
+    <div class="card-container">
+      <mat-card>
+        <div id="order" #pdfTable>
+          <mat-card-header>
+            <mat-card-title>Order</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="information">
+            <span><b>Customer: </b>{{ userInformation.name }}</span>
+            <span><b>Business: </b>{{ orderData.user.username }}</span>
+            <span>
+              <b>Address: </b>
+              <mat-form-field>
+                <input matInput formControlName="address" />
+              </mat-form-field>
+              <button mat-button color="accent" (click)="enableInput()">
+                Toggle
+              </button>
+            </span>
+            <span><b>Emitted Date:</b> {{ today | date: "fullDate" }}</span>
+          </mat-card-content>
+          <mat-card-header>
+            <mat-card-title>Selected Products</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="selected-products">
+            <cdk-virtual-scroll-viewport
+              itemSize="10"
+              class="selected-products-scroll"
+            >
+              <div *ngFor="let product of selectedProducts">
+                <span><b>Product:</b> {{ product.description }} </span>
+                <span><b>Price:</b> {{ product.price }} </span>
+                <span><b>Amount:</b> {{ product.amount }} </span>
+              </div>
+            </cdk-virtual-scroll-viewport>
+          </mat-card-content>
+        </div>
+      </mat-card>
+    </div>
+  </form>
+  <div class="card-buttons-container">
+    <button mat-button color="accent" (click)="back()">Back</button>
+    <button
+      mat-button
+      color="accent"
+      [disabled]="disableSubmit"
+      (click)="toggleBill()"
+    >
+      Order {{ price.toFixed(2) }}$
+    </button>
+  </div>
+</div>
+<div *ngIf="bill" class="bill-wrapper">
+  <app-bill
+    [products]="selectedProducts"
+    [client]="userInformation.name"
+    [sender]="orderData.user.name"
+    [total]="price"
+    (submitBill)="(submit)"
+    (toggleBill)="toggleBill()"
+  ></app-bill>
+</div>
