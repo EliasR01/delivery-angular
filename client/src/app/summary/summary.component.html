@@ -55,7 +55,7 @@
         [chartLabels]="chartLabels"
       ></app-line-chart>
     </mat-card>
-    <mat-card>
+    <mat-card *ngIf="!isBusiness">
       <mat-card-header>
         <mat-card-title>All Orders</mat-card-title>
       </mat-card-header>
@@ -68,6 +68,22 @@
             <span><b>Status: </b> {{ order.status }}</span>
             <span><b>Destination: </b> {{ order.address }}</span>
             <span><b>Total Price: </b> {{ order.price }}</span>
+          </ul>
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </mat-card>
+    <mat-card *ngIf="isBusiness">
+      <mat-card-header>
+        <mat-card-title>All Services</mat-card-title>
+      </mat-card-header>
+      <cdk-virtual-scroll-viewport itemSize="50" class="order-scroll">
+        <div *ngFor="let service of services" class="orders">
+          <ul (click)="editService(service)">
+            <li>
+              <span><b>Name: </b> {{ service.name }}</span>
+            </li>
+            <span><b>type: </b> {{ service.type }}</span>
+            <span><b>Description: </b> {{ service.description }}</span>
           </ul>
         </div>
       </cdk-virtual-scroll-viewport>

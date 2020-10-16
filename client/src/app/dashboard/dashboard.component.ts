@@ -3,10 +3,18 @@ import { Apollo } from 'apollo-angular';
 //import { GET_SERVICES } from '../queries/getServices';
 import { GET_TYPE_SERVICE } from '../queries/getTypeServices';
 import { GET_ORDERS_BY_USER } from '../queries/getOrdersByUser';
-import { Route, OrderDataResponse, TypeServiceResponse } from '../interfaces';
+import {
+  Route,
+  OrderDataResponse,
+  TypeServiceResponse,
+  ServiceDataResponse,
+} from '../interfaces';
 import { Router } from '@angular/router';
 import { NavItem } from '../interfaces';
 import { DashboardService } from '../dashboard.service';
+import { environment } from '../../environments/environment';
+import jwt_decode from 'jwt-decode';
+import { GET_SERVICES } from '../queries/getServices';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,6 +32,10 @@ export class DashboardComponent implements OnInit {
     private router: Router,
     private service: DashboardService
   ) {
+    const token = document.cookie.split('=')[1];
+    const payload = jwt_decode(token);
+    const userId = payload.userId._id;
+    this.service.userId = userId;
     if (this.service.userData) {
       this.route =
         this.service.userData.type === 'customer'
@@ -58,21 +70,23 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    /*this.apollo
-    .query<ServiceDataResponse>({
-        query: GET_SERVICES,
-        variables: { userID: this.userID },
-      })
-      .subscribe((response) => {
-        if (response.data) {
-          this.data = response.data;
-        }
-      });*/
     this.loading = true;
+    if (this.service.userData.type === 'bussiness') {
+      this.apollo
+        .query<ServiceDataResponse>({
+          query: GET_SERVICES,
+          variables: { userID: this.service.userId },
+        })
+        .subscribe((response) => {
+          if (response.data) {
+            this.service.services.push(response.data.getServiceByUser);
+          }
+        });
+    }
     this.apollo
       .watchQuery<OrderDataResponse>({
         query: GET_ORDERS_BY_USER,
-        variables: { userID: this.service.userData._id },
+        variables: { userID: this.service.userId },
       })
       .valueChanges.subscribe((res) => {
         this.service.orders = res.data.getOrdersByUser;

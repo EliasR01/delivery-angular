@@ -43,6 +43,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { OrderDialogComponent } from './order-dialog/order-dialog.component';
 import { LineChartComponent } from './line-chart/line-chart.component';
 import { MatTableModule } from '@angular/material/table';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { MatTableModule } from '@angular/material/table';
     OrderDialogComponent,
     LineChartComponent,
     BillComponent,
+    ForgotPasswordComponent,
   ],
   imports: [
     BrowserModule,

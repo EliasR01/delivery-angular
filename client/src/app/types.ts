@@ -14,7 +14,7 @@ export class Service {
   _id: string;
   name: string;
   description: string;
-  user: User;
+  user: string;
   type: string;
   products: [string];
 }

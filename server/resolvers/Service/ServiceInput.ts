@@ -14,7 +14,7 @@ export class ServiceData {
   @Field()
   type: string;
 
-  @Field()
+  @Field({ nullable: true })
   products?: string;
 }
 

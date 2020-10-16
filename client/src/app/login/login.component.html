@@ -1,32 +1,36 @@
 <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-<div class="wrapper">
-  <div class="image-wrapper">
-    <a routerLink="/">
-      <img mat-card-image src="../../assets/logo.jpg" alt="some logo" />
-    </a>
-  </div>
-  <form class="input-wrapper" [formGroup]="loginForm" (ngSubmit)="login()">
-    <mat-form-field>
-      <mat-label>Username</mat-label>
-      <input matInput type="text" formControlName="username" />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Password</mat-label>
-      <input matInput type="password" formControlName="password" />
-    </mat-form-field>
-    <div class="button-wrapper">
-      <button
-        type="submit"
-        mat-button
-        color="accent"
-        [disabled]="!loginForm.valid"
-      >
-        Login
-      </button>
-      <button mat-button color="accent">Forgot password?</button>
-      <a routerLink="/register">
-        <button mat-button color="accent">Not registered yet?</button>
+<div class="container">
+  <div class="wrapper">
+    <div class="image-wrapper">
+      <a routerLink="/">
+        <img mat-card-image src="../../assets/logo.jpg" alt="some logo" />
       </a>
     </div>
-  </form>
+    <form class="input-wrapper" [formGroup]="loginForm" (ngSubmit)="login()">
+      <mat-form-field>
+        <mat-label>Username</mat-label>
+        <input matInput type="text" formControlName="username" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" />
+      </mat-form-field>
+      <div class="button-wrapper">
+        <button
+          type="submit"
+          mat-button
+          color="accent"
+          [disabled]="!loginForm.valid"
+        >
+          Login
+        </button>
+        <a routerLink="/forgot">
+          <button mat-button color="accent">Forgot password?</button>
+        </a>
+        <a routerLink="/register">
+          <button mat-button color="accent">Not registered yet?</button>
+        </a>
+      </div>
+    </form>
+  </div>
 </div>

@@ -1,14 +1,14 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { DashboardService } from '../dashboard.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { CREATE_SERVICE } from '../mutations/createService';
 import { CREATE_PRODUCT } from '../mutations/createProduct';
 import { UPDATE_SERVICE } from '../mutations/updateService';
+import { GET_PRODUCTS_BY_IDS } from '../queries/getProductsById';
 import { TypeService } from '../types';
 import { DialogComponent } from '../dialog/dialog.component';
-import { ServiceDataResponse } from '../interfaces';
-import { ProductDataResponse } from '../interfaces';
+import { ServiceDataResponse, ProductDataResponse } from '../interfaces';
 import { MatDialog } from '@angular/material/dialog';
 import { Apollo } from 'apollo-angular';
 import { Product } from '../types';
@@ -20,15 +20,16 @@ import { Location } from '@angular/common';
   styleUrls: ['./add-service.component.scss'],
 })
 export class AddServiceComponent implements OnInit {
-  typeServices: [TypeService];
+  typeServices: TypeService[];
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   constructor(
     private service: DashboardService,
     private apollo: Apollo,
     private dialog: MatDialog,
-    private location: Location
+    private location: Location,
+    private detector: ChangeDetectorRef
   ) {}
-
+  isEditingService: Boolean = false;
   products: Product[] = [];
 
   serviceForm = new FormGroup({
@@ -43,12 +44,12 @@ export class AddServiceComponent implements OnInit {
     price: new FormControl(0.0, [Validators.required]),
     description: new FormControl('', [Validators.required]),
   });
-  isButtonEnabled: boolean = false;
-  isProductEnabled: boolean = this.serviceForm.valid;
+  isButtonEnabled: Boolean = false;
+  isProductEnabled: Boolean = this.serviceForm.valid;
   description: string = 'Description';
 
   toggleDescription(): void {
-    if (this.serviceForm.value.typeService === 'Food') {
+    if (this.serviceForm.value.type === 'Food') {
       this.description = 'Ingredients';
     } else {
       this.description = 'Description';
@@ -61,9 +62,20 @@ export class AddServiceComponent implements OnInit {
         (element) => element.name === this.productForm.value.name
       ) === undefined
     ) {
-      this.products.push(this.productForm.value);
-      this.resetForm('ProductForm');
-      this.isButtonEnabled = true;
+      if (
+        this.productForm.value.stock > 0 &&
+        this.productForm.value.price > 0 &&
+        this.productForm.value.name != '' &&
+        this.productForm.value.description != ''
+      ) {
+        this.products.push(this.productForm.value);
+        this.resetForm('ProductForm');
+        this.isButtonEnabled = true;
+      } else {
+        this.dialog.open(DialogComponent, {
+          data: 'Must complete the form before adding a product!',
+        });
+      }
     } else {
       this.dialog.open(DialogComponent, {
         data: 'That name of product has been already added!',
@@ -103,7 +115,7 @@ export class AddServiceComponent implements OnInit {
             .mutate<ProductDataResponse>({
               mutation: CREATE_PRODUCT,
               variables: {
-                productData,
+                products: productData,
               },
             })
             .subscribe((response) => {
@@ -156,5 +168,26 @@ export class AddServiceComponent implements OnInit {
 
   ngOnInit(): void {
     this.typeServices = this.service.typeService;
+    if (this.service.editableService) {
+      this.isEditingService = true;
+      this.serviceForm.controls['type'].setValue(
+        this.service.editableService.type
+      );
+      this.serviceForm.controls['name'].setValue(
+        this.service.editableService.name
+      );
+      this.serviceForm.controls['description'].setValue(
+        this.service.editableService.description
+      );
+      this.apollo
+        .query<ProductDataResponse>({
+          query: GET_PRODUCTS_BY_IDS,
+          variables: { _id: this.service.editableService.products },
+        })
+        .subscribe((response) => {
+          this.products = response.data.getProductsById;
+          this.detector.markForCheck();
+        });
+    }
   }
 }

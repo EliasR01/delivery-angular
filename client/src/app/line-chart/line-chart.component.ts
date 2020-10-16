@@ -24,6 +24,15 @@ export class LineChartComponent implements OnInit {
   lineChartLabels: Label[];
   lineChartOptions: ChartOptions = {
     responsive: true,
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      ],
+    },
   };
   lineChartColors: Color[] = [
     {

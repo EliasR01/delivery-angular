@@ -13,7 +13,7 @@ export function createApollo(httpLink: HttpLink) {
   let isRefreshedToken = false;
   let pendingRequests = [];
 
-  const uri = 'http://localhost:4000'; // <-- add the URL of the GraphQL server here
+  const uri = 'http://localhost:4000/graphql'; // <-- add the URL of the GraphQL server here
   const errorLink = onError(
     ({ graphQLErrors, networkError, operation, forward }) => {
       if (graphQLErrors) {
@@ -23,7 +23,7 @@ export function createApollo(httpLink: HttpLink) {
             if (!isRefreshedToken) {
               isRefreshedToken = true;
               forward$ = fromPromise(
-                fetch('http://localhost:4000/refresh_token_id', {
+                fetch(`${uri}/refresh_token_id`, {
                   method: 'POST',
                   credentials: 'include',
                 })
@@ -139,6 +139,7 @@ export function createApollo(httpLink: HttpLink) {
 
   const endpoint = httpLink.create({
     uri,
+    withCredentials: true,
   });
 
   return {

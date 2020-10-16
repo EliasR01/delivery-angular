@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DashboardService } from '../dashboard.service';
 import { Router } from '@angular/router';
-import { Order, User } from '../types';
+import { Order, Service, User } from '../types';
 import { Apollo } from 'apollo-angular';
 import { MatDialog } from '@angular/material/dialog';
 import { OrderDialogComponent } from '../order-dialog/order-dialog.component';
@@ -25,8 +25,11 @@ export class SummaryComponent implements OnInit {
     private dialog: MatDialog
   ) {}
   userData: User;
-  orders: [Order];
+  orders: Order[];
+  services: Service[];
   isButtonVisible: Boolean;
+  isBusiness: Boolean =
+    this.service.userData.type === 'business' ? true : false;
   loading: Boolean = false;
   chartData: ChartData;
   pendingOrders: Order[] = [];
@@ -41,6 +44,11 @@ export class SummaryComponent implements OnInit {
 
   newOrder(): void {
     this.router.navigate(['dashboard/order']);
+  }
+
+  editService(serviceData: Service): void {
+    this.service.editableService = serviceData;
+    this.router.navigate(['dashboard/service']);
   }
 
   openOrder(order: Order): void {
@@ -111,5 +119,8 @@ export class SummaryComponent implements OnInit {
     });
 
     this.chartLabels = months;
+    if (this.isBusiness) {
+      this.services = this.service.services;
+    }
   }
 }

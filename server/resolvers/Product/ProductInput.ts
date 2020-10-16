@@ -1,7 +1,7 @@
 import { Field, ID, InputType } from 'type-graphql';
 
 @InputType()
-export class ProductData {
+export class ProductDataInput {
   @Field()
   name: string;
 
@@ -16,6 +16,12 @@ export class ProductData {
 
   @Field()
   service: string;
+}
+
+@InputType()
+export class ProductData {
+  @Field(() => [ProductDataInput])
+  products: ProductDataInput[];
 }
 
 @InputType()

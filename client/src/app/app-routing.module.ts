@@ -8,6 +8,7 @@ import { UserProfileComponent } from './user-profile/user-profile.component';
 import { SummaryComponent } from './summary/summary.component';
 import { OrderComponent } from './order/order.component';
 import { AddServiceComponent } from './add-service/add-service.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 
 const routes: Routes = [
   {
@@ -21,6 +22,10 @@ const routes: Routes = [
   {
     path: 'register',
     component: RegisterComponent,
+  },
+  {
+    path: 'forgot',
+    component: ForgotPasswordComponent,
   },
   {
     path: 'dashboard',

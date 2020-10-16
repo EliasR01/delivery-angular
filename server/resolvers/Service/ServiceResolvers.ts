@@ -49,14 +49,13 @@ export class ServiceResolver {
   async createService(
     @Arg('serviceData') serviceData: ServiceData
   ): Promise<Service> {
-    const service = await db.collection('service').insertOne(serviceData);
     const returnUser = await db
       .collection('user')
       .findOne(new ObjectID(serviceData.user));
     if (!returnUser) throw new Error('User does not exists!');
+    const service = await db.collection('service').insertOne(serviceData);
     const { user, ...objectWithoutUser } = service.ops[0];
     const returnObject = { ...objectWithoutUser, user: returnUser._id };
-    console.log(returnObject);
     return returnObject;
   }
 
@@ -67,6 +66,11 @@ export class ServiceResolver {
     const service = await db
       .collection('service')
       .findOneAndDelete({ _id: new ObjectID(where._id) });
+
+    // await db
+    //   .collection('product')
+    //   .deteleMany({ _id: { $in: service.value.products } });
+    console.log(service);
     return service.value;
   }
 }

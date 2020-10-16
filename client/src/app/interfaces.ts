@@ -67,6 +67,9 @@ export interface ServiceDataResponse {
     _id: string;
     name: string;
     description: string;
+    user: string;
+    type: string;
+    products: [string];
   };
   getServiceByType?: {
     _id: string;
@@ -78,18 +81,18 @@ export interface ServiceDataResponse {
   };
   createService?: {
     _id: string;
-    name?: string;
-    description?: string;
-    user?: string;
-    type?: string;
+    name: string;
+    description: string;
+    user: string;
+    type: string;
     products?: [string];
   };
   updateService?: {
     _id: string;
-    name?: string;
-    description?: string;
-    user?: string;
-    type?: string;
+    name: string;
+    description: string;
+    user: string;
+    type: string;
     products?: [string];
   };
 }
@@ -98,21 +101,21 @@ export interface ProductDataResponse {
   createProduct?: [
     {
       _id: string;
-      name?: string;
-      stock?: number;
-      price?: number;
-      description?: string;
-      service?: string;
+      name: string;
+      stock: number;
+      price: number;
+      description: string;
+      service: string;
     }
   ];
   updateProduct?: [
     {
       _id: string;
-      name?: string;
-      stock?: number;
-      price?: number;
-      description?: string;
-      service?: string;
+      name: string;
+      stock: number;
+      price: number;
+      description: string;
+      service: string;
     }
   ];
   getProductsById?: [
@@ -182,4 +185,20 @@ export interface PeriodicElement {
   amount?: number;
   unitPrice?: number;
   total: number;
+}
+
+export interface RequestResetResponse {
+  requestReset: {
+    user: {
+      _id: string;
+      name: string;
+      username: string;
+      password?: string;
+      address: string;
+      email: string;
+      type: string;
+      country: string;
+      fileUrl: string;
+    };
+  };
 }

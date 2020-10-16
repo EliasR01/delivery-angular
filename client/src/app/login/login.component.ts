@@ -67,7 +67,7 @@ export class LoginComponent implements OnInit {
         }
       })
       .catch((err) => {
-        console.log('Loging error');
+        console.log(err);
         this.loading = false;
         this.dialog.open(DialogComponent, {
           data: err,

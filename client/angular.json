@@ -116,6 +116,12 @@
               "devServerTarget": "delivery-app:serve:production"
             }
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {
+            "help": true
+          }
         }
       }
     }

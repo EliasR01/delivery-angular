@@ -63,13 +63,15 @@ export class ProductResolver {
     }
   }
 
-  @Mutation(() => Product)
+  @Mutation(() => [Product])
   async createProduct(
     @Arg('productData') productData: ProductData
   ): Promise<Product> {
     try {
-      const product = await db.collection('product').insertMany(productData);
-      return product.ops[0];
+      const product = await db
+        .collection('product')
+        .insertMany(productData.products);
+      return product.ops;
     } catch (err) {
       throw new Error(err);
     }
@@ -83,9 +85,9 @@ export class ProductResolver {
       const productsId = where._id.map((value) => new ObjectID(value));
       const product = await db
         .collection('product')
-        .findAndDelete({ _id: { $in: productsId } });
-
-      return product;
+        .deleteMany({ _id: { $in: productsId } });
+      console.log(product);
+      return product.value;
     } catch (err) {
       throw new Error(err);
     }

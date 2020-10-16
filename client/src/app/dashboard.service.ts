@@ -4,16 +4,19 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import { finalize } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { UploadTaskSnapshot } from '@angular/fire/storage/interfaces';
-import { Order, TypeService, User } from './types';
+import { Order, TypeService, User, Service } from './types';
 import emailjs from 'emailjs-com';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardService {
-  typeService: [TypeService];
+  typeService: TypeService[];
   userData: User;
-  orders: [Order];
+  orders: Order[];
+  userId: string;
+  services: Service[];
+  editableService: Service;
 
   uploadFile(file: any, username: string): Observable<UploadTaskSnapshot> {
     const filePath = `RoomsImages/${username}-${Date.now()}`;

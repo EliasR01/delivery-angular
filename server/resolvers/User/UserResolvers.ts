@@ -15,12 +15,21 @@ import { ObjectID } from 'mongodb';
 import { User } from './User';
 import { MyContext } from '../../MyContext';
 import { UserWhereData, UserData, UserWhereUniqueData } from './UserInput';
+import * as nodemailer from 'nodemailer';
 
 @ObjectType()
 class LoginResponse {
   @Field()
   accessToken: string;
   @Field(() => User)
+  user: User;
+}
+
+@ObjectType()
+class ResetPasswordResponse {
+  @Field()
+  resetToken: string;
+  @Field()
   user: User;
 }
 
@@ -47,11 +56,15 @@ export class UserResolver {
     @Arg('userData') userData: UserData
   ): Promise<User> {
     try {
+      const salt = genSaltSync(10);
+      const hashedPassword = await hash(userData.password, salt);
+      const { password, ...data } = userData;
+      const updateUserData = { ...data, password: hashedPassword };
       const user = await db
         .collection('user')
         .findOneAndUpdate(
           { _id: new ObjectID(where._id) },
-          { $set: userData },
+          { $set: updateUserData },
           { returnOriginal: false }
         );
       return user.value;
@@ -93,15 +106,76 @@ export class UserResolver {
     @Arg('password') password: string,
     @Ctx() { res }: MyContext
   ): Promise<LoginResponse> {
-    const user = await db.collection('user').findOne({ username });
-    if (!user) throw new Error('Invalid login credentials');
+    try {
+      const user = await db.collection('user').findOne({ username });
+      if (!user) throw new Error('Invalid login credentials');
 
-    const isEqual = await compare(password, user.password);
-    if (!isEqual) throw new Error('Invalid login credentials');
+      const isEqual = await compare(password, user.password);
+      if (!isEqual) throw new Error('Invalid login credentials');
+      sendRefreshToken(res, createRefreshToken(user));
+      return { accessToken: createAccessToken(user), user };
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 
-    sendRefreshToken(res, createRefreshToken(user));
+  @Mutation(() => ResetPasswordResponse)
+  async requestReset(
+    @Arg('email') email: string
+  ): Promise<ResetPasswordResponse> {
+    email = email.toLowerCase();
 
-    return { accessToken: createAccessToken(user), user };
+    try {
+      const user = await db.collection('user').findOne({ email });
+      if (!user) throw new Error('There is no user registered with that email');
+      const resetToken = (
+        Math.random().toString(15).substring(2, 6) +
+        Math.random().toString(15).substring(2, 6)
+      ).toUpperCase();
+      const expirationDate = Date.now() + 1800000;
+
+      await db.collection('reset_tokens').insertOne({
+        resetToken,
+        expirationDate,
+      });
+
+      const transporter = nodemailer.createTransport({
+        // host: 'smtp-relay.sendinblue.com',
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+          user: 'wilford.olson1@ethereal.email',
+          pass: '8H4xmQhKq7hWyZvqeF',
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"Delivery Service" "eliasalejo01@gmail.com"',
+        to: user.email,
+        subject: 'Reset password code',
+        text: `Reset code: ${resetToken} , it expires in 30m.`,
+      });
+
+      return {
+        resetToken,
+        user,
+      };
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  async resetPassword(@Arg('token') token: string): Promise<boolean> {
+    const isToken = await db
+      .collection('reset_tokens')
+      .findOne({ resetToken: token });
+    if (!isToken) throw new Error('Reset code is not valid!');
+
+    const isExpired = Date.now() < isToken.expirationDate;
+    if (!isExpired) throw new Error('Token is expired!');
+    await db.collection('reset_tokens').deleteOne({ resetToken: token });
+    return true;
   }
 
   @Mutation(() => Boolean)
