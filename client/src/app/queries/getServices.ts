@@ -6,6 +6,9 @@ export const GET_SERVICES = gql`
       _id
       name
       description
+      user
+      type
+      products
     }
   }
 `;

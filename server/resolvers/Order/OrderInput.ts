@@ -17,14 +17,17 @@ export class OrderData {
   @Field()
   status: string;
 
-  @Field()
-  products: string;
+  @Field(() => [String])
+  products: string[];
 
   @Field()
   user: string;
 
   @Field()
-  bussiness: string;
+  business: string;
+
+  // @Field()
+  // fileUrl: string;
 }
 
 @InputType()

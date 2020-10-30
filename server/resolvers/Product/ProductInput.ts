@@ -2,6 +2,9 @@ import { Field, ID, InputType } from 'type-graphql';
 
 @InputType()
 export class ProductDataInput {
+  @Field({ nullable: true })
+  _id?: string;
+
   @Field()
   name: string;
 
@@ -14,8 +17,8 @@ export class ProductDataInput {
   @Field()
   description: string;
 
-  @Field()
-  service: string;
+  @Field({ nullable: true })
+  service?: string;
 }
 
 @InputType()
@@ -28,4 +31,10 @@ export class ProductData {
 export class ProductWhereUniqueData {
   @Field(() => [ID])
   _id: string[];
+}
+
+@InputType()
+export class ProductWhereServiceData {
+  @Field()
+  service: string;
 }

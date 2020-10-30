@@ -2,22 +2,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: radial-gradient(
+    circle,
+    rgba(221, 220, 220, 1) 31%,
+    rgba(230, 230, 230, 1) 72%
+  );
 }
 
 .toolbar-logo {
   display: flex;
-  height: 80%;
+  height: 90%;
+  width: 10%;
   img {
     border-radius: 5px;
-    width: 60px;
-    height: 90%;
+    width: 80px;
+    height: 100%;
   }
 }
 
 .toolbar-buttons {
   display: flex;
   justify-content: space-between;
-  margin-right: 1%;
 }
 
 .page {
@@ -35,7 +40,7 @@
       display: flex;
       justify-content: center;
       width: 100%;
-      height: 250px;
+      height: 300px;
       text-align: center;
 
       h1 {
@@ -48,11 +53,21 @@
 }
 
 .section-1-a {
-  background-color: #b1ffef;
+  // background-color: #b1ffef;
+  background: radial-gradient(
+    circle,
+    rgba(238, 174, 202, 1) 0%,
+    rgba(148, 187, 233, 1) 100%
+  );
 }
 
 .section-1-b {
-  background-color: #b5ffb1;
+  // background-color: #b5ffb1;
+  background: radial-gradient(
+    circle,
+    rgba(238, 174, 202, 1) 0%,
+    rgba(148, 187, 233, 1) 100%
+  );
 }
 
 .section-2-a {

@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogComponent } from '../dialog/dialog.component';
+import { setAccessToken } from '../utils';
 
 @Component({
   selector: 'app-login',
@@ -47,6 +48,7 @@ export class LoginComponent implements OnInit {
       .toPromise()
       .then((response) => {
         if (response.data.login.accessToken) {
+          setAccessToken(response.data.login.accessToken);
           this.apollo
             .query<UserDataResponse>({
               query: GET_USER_BY_ID,
@@ -56,7 +58,8 @@ export class LoginComponent implements OnInit {
             .then((res) => {
               if (res.data.getUserById) {
                 this.service.userData = res.data.getUserById;
-                this.router.navigate(['dashboard']);
+                // this.router.navigate(['dashboard']);
+                this.router.navigate(['dashboard/summary']);
               } else {
                 this.message =
                   'Something went wrong, please contact the support team';

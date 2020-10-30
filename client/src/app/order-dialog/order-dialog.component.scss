@@ -3,9 +3,19 @@
   flex-flow: column;
   justify-content: center;
   align-items: center;
+
+  span {
+    margin-bottom: 5px;
+  }
 }
 
 .order-products-scroll {
   width: 100%;
   height: 150px;
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

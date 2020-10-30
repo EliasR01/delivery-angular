@@ -64,13 +64,18 @@ export class UserProfileComponent implements OnInit {
     reader.readAsDataURL(this.userForm.value.file[0]);
     reader.onload = () => {
       this.imageUrl = reader.result;
+      console.log(this.imageUrl);
     };
   }
 
   update(): void {
     if (this.userForm.value.file != this.service.userData.fileUrl) {
       this.service
-        .uploadFile(this.userForm.value.file[0], this.service.userData.username)
+        .uploadFile(
+          this.userForm.value.file[0],
+          this.service.userData.username,
+          'IMAGE'
+        )
         .subscribe((e) => {
           e.ref.getDownloadURL().then((value) => {
             this.updateUser(value);

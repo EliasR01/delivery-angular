@@ -1,5 +1,6 @@
-<div>
-  <mat-toolbar color="primary">
+<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+<div *ngIf="!loading">
+  <mat-toolbar>
     <button mat-icon-button>
       <mat-icon (click)="sidenav.toggle()">Menu</mat-icon>
     </button>
@@ -12,6 +13,7 @@
           mat-list-item
           *ngFor="let item of navItems"
           [routerLink]="item.route"
+          (click)="item.action()"
           >{{ item.displayName }}</a
         >
       </mat-nav-list>

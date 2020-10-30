@@ -1,20 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 //import { GET_SERVICES } from '../queries/getServices';
 import { GET_TYPE_SERVICE } from '../queries/getTypeServices';
-import { GET_ORDERS_BY_USER } from '../queries/getOrdersByUser';
-import {
-  Route,
-  OrderDataResponse,
-  TypeServiceResponse,
-  ServiceDataResponse,
-} from '../interfaces';
+import { LOGOUT } from '../mutations/logout';
+import { Route, TypeServiceResponse, UserDataResponse } from '../interfaces';
 import { Router } from '@angular/router';
 import { NavItem } from '../interfaces';
 import { DashboardService } from '../dashboard.service';
-import { environment } from '../../environments/environment';
 import jwt_decode from 'jwt-decode';
-import { GET_SERVICES } from '../queries/getServices';
+import { GET_USER_BY_ID } from '../queries/getUserById';
+import { DialogComponent } from '../dialog/dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -26,77 +22,118 @@ export class DashboardComponent implements OnInit {
   route: Route;
   navItems: NavItem[];
   loading: boolean = false;
+  message: string;
 
   constructor(
     private apollo: Apollo,
     private router: Router,
-    private service: DashboardService
-  ) {
-    const token = document.cookie.split('=')[1];
-    const payload = jwt_decode(token);
-    const userId = payload.userId._id;
-    this.service.userId = userId;
-    if (this.service.userData) {
-      this.route =
-        this.service.userData.type === 'customer'
-          ? { name: 'New Order', route: 'order' }
-          : { name: 'New Service', route: 'service' };
+    private service: DashboardService,
+    private dialog: MatDialog,
+    private detector: ChangeDetectorRef
+  ) {}
 
-      this.navItems = [
-        {
-          displayName: 'Profile',
-          iconName: 'recent_actors',
-          route: 'profile',
-        },
-        {
-          displayName: 'Summary',
-          iconName: 'some',
-          route: 'summary',
-        },
-        {
-          displayName: this.route.name,
-          iconName: 'some-icon',
-          route: this.route.route,
-        },
-        {
-          displayName: 'Logout',
-          iconName: 'logout',
-          route: '/login',
-        },
-      ];
-    } else {
-      this.router.navigate(['login']);
-    }
+  queryUserData(userId: string): void {
+    this.loading = true;
+    this.apollo
+      .query<UserDataResponse>({
+        query: GET_USER_BY_ID,
+        variables: { data: { _id: userId } },
+      })
+      .toPromise()
+      .then((response) => {
+        this.apollo
+          .query<TypeServiceResponse>({ query: GET_TYPE_SERVICE })
+          .toPromise()
+          .then((res) => {
+            this.service.userData = response.data.getUserById;
+            this.service.typeService = res.data.getTypeOfService;
+            this.setRoutes();
+            this.detector.markForCheck();
+            this.loading = false;
+          })
+          .catch(() => {
+            this.message =
+              'Something went wrong, please contact the support team';
+            this.dialog.open(DialogComponent, { data: this.message });
+          });
+      })
+      .catch(() => {
+        this.message = 'Something went wrong, please contact the support team';
+        this.dialog.open(DialogComponent, { data: this.message });
+      });
+  }
+
+  setRoutes(): void {
+    this.route =
+      this.service.userData.type === 'customer'
+        ? { name: 'New Order', route: 'order' }
+        : { name: 'New Service', route: 'service' };
+
+    this.navItems = [
+      {
+        displayName: 'Profile',
+        iconName: 'recent_actors',
+        route: 'profile',
+        action: this.nothing.bind(this),
+      },
+      {
+        displayName: 'Summary',
+        iconName: 'some',
+        route: 'summary',
+        action: this.nothing.bind(this),
+      },
+      {
+        displayName: this.route.name,
+        iconName: 'some-icon',
+        route: this.route.route,
+        action: this.nothing.bind(this),
+      },
+      {
+        displayName: 'Logout',
+        iconName: 'logout',
+        route: null,
+        action: this.logout.bind(this),
+      },
+    ];
+  }
+
+  nothing(): void {
+    null;
+  }
+
+  logout(): void {
+    this.apollo
+      .mutate({ mutation: LOGOUT })
+      .toPromise()
+      .then((res) => {
+        if (res) {
+          this.router.navigate(['login']);
+        } else {
+          this.dialog.open(DialogComponent, { data: 'Error loging out' });
+        }
+      })
+      .catch(() => {
+        this.dialog.open(DialogComponent, { data: 'Error loging out' });
+      });
   }
 
   ngOnInit(): void {
-    this.loading = true;
-    if (this.service.userData.type === 'bussiness') {
-      this.apollo
-        .query<ServiceDataResponse>({
-          query: GET_SERVICES,
-          variables: { userID: this.service.userId },
-        })
-        .subscribe((response) => {
-          if (response.data) {
-            this.service.services.push(response.data.getServiceByUser);
-          }
-        });
+    try {
+      const token = document.cookie.split('=')[1];
+      const payload = jwt_decode(token);
+      const userId = payload.userId._id;
+      this.service.userId = userId;
+      if (userId) {
+        if (this.service.userData === undefined) {
+          this.queryUserData(userId);
+        } else {
+          this.setRoutes();
+        }
+      } else {
+        this.router.navigate(['login']);
+      }
+    } catch (err) {
+      this.router.navigate(['login']);
     }
-    this.apollo
-      .watchQuery<OrderDataResponse>({
-        query: GET_ORDERS_BY_USER,
-        variables: { userID: this.service.userId },
-      })
-      .valueChanges.subscribe((res) => {
-        this.service.orders = res.data.getOrdersByUser;
-      });
-    this.apollo
-      .query<TypeServiceResponse>({ query: GET_TYPE_SERVICE })
-      .subscribe((res) => {
-        this.service.typeService = res.data.getTypeOfService;
-        this.router.navigate(['dashboard/summary']);
-        this.loading = false;
-      });
   }
 }

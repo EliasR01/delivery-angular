@@ -63,14 +63,16 @@ export interface LoginResponse {
 }
 
 export interface ServiceDataResponse {
-  getServiceByUser?: {
-    _id: string;
-    name: string;
-    description: string;
-    user: string;
-    type: string;
-    products: [string];
-  };
+  getServiceByUser?: [
+    {
+      _id: string;
+      name: string;
+      description: string;
+      user: string;
+      type: string;
+      products: [string];
+    }
+  ];
   getServiceByType?: {
     _id: string;
     name: string;
@@ -140,6 +142,7 @@ export interface OrderDataResponse {
       products: [string];
       user: string;
       bussiness: string;
+      fileUrl: string;
     }
   ];
 }
@@ -157,6 +160,7 @@ export interface NavItem {
   disabled?: boolean;
   iconName: string;
   route?: string;
+  action: any;
 }
 
 export interface UserType {
@@ -171,7 +175,7 @@ export interface Route {
 
 export interface TemplateParams {
   from_name: String;
-  to_name: String;
+  to: String;
   subject: String;
   message_html: String;
 }

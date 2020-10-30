@@ -4,7 +4,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express from 'express';
+import express, { Response, Request } from 'express';
 import { verify } from 'jsonwebtoken';
 import { ObjectID } from 'mongodb';
 import { MongoDb, db } from './mongo';
@@ -15,6 +15,9 @@ import { ProductResolver } from './resolvers/Product/ProductResolvers';
 import { TypeServiceResolver } from './resolvers/TypeService/TypeServiceResolvers';
 import { createAccessToken, createRefreshToken } from './auth';
 import { sendRefreshToken } from './sendRefreshToken';
+import formidable from 'formidable';
+import fs from 'fs-extra';
+import * as nodemailer from 'nodemailer';
 //mongodb://127.0.0.1:27017
 (async () => {
   try {
@@ -24,9 +27,14 @@ import { sendRefreshToken } from './sendRefreshToken';
 
     app.use(
       cors({
-        origin: 'http://localhost:4200',
+        origin: ['http://localhost:4200'],
         credentials: true,
-        allowedHeaders: 'Content-Type',
+        allowedHeaders: [
+          'Content-Type',
+          'authentication',
+          'businessEmail',
+          'userEmail',
+        ],
       })
     );
 
@@ -54,6 +62,72 @@ import { sendRefreshToken } from './sendRefreshToken';
       sendRefreshToken(res, createRefreshToken(user._id));
 
       return res.send({ ok: true, accessToken: createAccessToken(user._id) });
+    });
+
+    app.post('/uploadFile', async (req: Request, res: Response) => {
+      let newPath: string;
+      const path = './files/';
+      const form = new formidable.IncomingForm();
+      form.uploadDir = path;
+      form.encoding = 'binary';
+      const userEmail = req.headers.useremail;
+      const businessEmail = req.headers.businessemail;
+      form.parse(req, (err, _, files) => {
+        if (err) {
+          res.send('Upload failed');
+          throw new Error(err);
+        } else {
+          const oldPath = files.order.path;
+          newPath = `${path}-${userEmail}-${Date.now()}`;
+          fs.rename(oldPath, newPath, async (err) => {
+            if (err) throw err;
+            const transporter = nodemailer.createTransport({
+              host: 'smtp.ethereal.email',
+              port: 587,
+              auth: {
+                user: 'wilford.olson1@ethereal.email',
+                pass: '8H4xmQhKq7hWyZvqeF',
+              },
+            });
+            const attachments = [
+              {
+                filename: 'bill.pdf',
+                path: newPath,
+                contentType: 'application/pdf',
+              },
+            ];
+            await transporter
+              .sendMail({
+                from: '"Delivery Service" "eliasalejo01@gmail.com"',
+                to: businessEmail,
+                subject: 'Reset password code',
+                text: `Greetings. Here is the last ordered bill.`,
+                attachments,
+              })
+              .then((res) => {
+                console.log(res);
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+
+            await transporter
+              .sendMail({
+                from: '"Delivery Service" "eliasalejo01@gmail.com"',
+                to: userEmail,
+                subject: 'Reset password code',
+                text: `Greetings. Here is the last ordered bill.`,
+                attachments,
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+            console.log(newPath);
+            fs.unlink(newPath, (err) => console.error(err));
+            res.end();
+          });
+        }
+      });
     });
 
     const apolloServer = new ApolloServer({

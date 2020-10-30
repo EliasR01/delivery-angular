@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { TemplateParams } from './interfaces';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { finalize } from 'rxjs/operators';
@@ -18,13 +18,23 @@ export class DashboardService {
   services: Service[];
   editableService: Service;
 
-  uploadFile(file: any, username: string): Observable<UploadTaskSnapshot> {
-    const filePath = `RoomsImages/${username}-${Date.now()}`;
+  uploadFile(
+    file: any,
+    username: string,
+    fileType: string
+  ): Observable<UploadTaskSnapshot> {
+    let filePath: string;
+    if (fileType === 'PDF') {
+      filePath = `OrderImages/${username}-${new Date().toISOString()}`;
+    } else if (filePath === 'IMAGE') {
+      filePath = `ProfileImages/${username}-${new Date().toISOString()}`;
+    }
     const fileRef = this.storage.ref(filePath);
     const task = this.storage.upload(filePath, file);
     const url = task.snapshotChanges().pipe(
       finalize(() => {
-        fileRef.getDownloadURL().subscribe((fileUrl) => {
+        return fileRef.getDownloadURL().subscribe((fileUrl) => {
+          console.log(fileUrl);
           return fileUrl;
         });
       })
@@ -46,5 +56,5 @@ export class DashboardService {
     this.storage.storage.refFromURL(fileUrl).delete();
   }
 
-  constructor(private storage: AngularFireStorage, private zone: NgZone) {}
+  constructor(private storage: AngularFireStorage) {}
 }

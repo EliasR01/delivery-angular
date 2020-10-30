@@ -49,7 +49,7 @@
                     />
                   </mat-form-field>
                   <mat-checkbox
-                    color="accent"
+                    color="primary"
                     #checkbox
                     (change)="addProduct($event, product, amount, checkbox)"
                   >
@@ -76,7 +76,7 @@
               <mat-form-field>
                 <input matInput formControlName="address" />
               </mat-form-field>
-              <button mat-button color="accent" (click)="enableInput()">
+              <button mat-button color="primary" (click)="enableInput()">
                 Toggle
               </button>
             </span>
@@ -91,7 +91,7 @@
               class="selected-products-scroll"
             >
               <div *ngFor="let product of selectedProducts">
-                <span><b>Product:</b> {{ product.description }} </span>
+                <span><b>Product:</b> {{ product.name }} </span>
                 <span><b>Price:</b> {{ product.price }} </span>
                 <span><b>Amount:</b> {{ product.amount }} </span>
               </div>
@@ -102,10 +102,10 @@
     </div>
   </form>
   <div class="card-buttons-container">
-    <button mat-button color="accent" (click)="back()">Back</button>
+    <button mat-button color="primary" (click)="back()">Back</button>
     <button
       mat-button
-      color="accent"
+      color="primary"
       [disabled]="disableSubmit"
       (click)="toggleBill()"
     >
@@ -119,7 +119,8 @@
     [client]="userInformation.name"
     [sender]="orderData.user.name"
     [total]="price"
-    (submitBill)="(submit)"
+    [loading]="loading"
+    (submitBill)="submit()"
     (toggleBill)="toggleBill()"
   ></app-bill>
 </div>

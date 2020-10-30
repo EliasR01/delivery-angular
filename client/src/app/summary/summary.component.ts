@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { DashboardService } from '../dashboard.service';
 import { Router } from '@angular/router';
 import { Order, Service, User } from '../types';
@@ -7,9 +7,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { OrderDialogComponent } from '../order-dialog/order-dialog.component';
 import { BaseChartDirective } from 'ng2-charts';
 import { GET_PRODUCTS_BY_IDS } from '../queries/getProductsById';
-import { ProductDataResponse, DateArray } from '../interfaces';
+import {
+  ProductDataResponse,
+  DateArray,
+  ServiceDataResponse,
+  OrderDataResponse,
+} from '../interfaces';
 import { DialogComponent } from '../dialog/dialog.component';
 import { ChartData } from 'chart.js';
+import { GET_SERVICES } from '../queries/getServices';
+import { GET_ORDERS_BY_USER } from '../queries/getOrdersByUser';
 
 @Component({
   selector: 'app-summary',
@@ -22,14 +29,14 @@ export class SummaryComponent implements OnInit {
     private service: DashboardService,
     private router: Router,
     private apollo: Apollo,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private detector: ChangeDetectorRef
   ) {}
   userData: User;
   orders: Order[];
   services: Service[];
   isButtonVisible: Boolean;
-  isBusiness: Boolean =
-    this.service.userData.type === 'business' ? true : false;
+  isBusiness: Boolean;
   loading: Boolean = false;
   chartData: ChartData;
   pendingOrders: Order[] = [];
@@ -37,6 +44,7 @@ export class SummaryComponent implements OnInit {
   pendingOrdersMap: DateArray = {};
   completedOrdersMap: DateArray = {};
   chartLabels: string[];
+  completed: Boolean = false;
 
   editUserInfo(): void {
     this.router.navigate(['dashboard/profile']);
@@ -51,12 +59,16 @@ export class SummaryComponent implements OnInit {
     this.router.navigate(['dashboard/service']);
   }
 
+  newService(): void {
+    this.router.navigate(['dashboard/service']);
+  }
+
   openOrder(order: Order): void {
     this.loading = true;
     this.apollo
       .query<ProductDataResponse>({
         query: GET_PRODUCTS_BY_IDS,
-        variables: { products: order.products },
+        variables: { products: { _id: order.products } },
       })
       .toPromise()
       .then((response) => {
@@ -74,14 +86,7 @@ export class SummaryComponent implements OnInit {
       });
   }
 
-  editOrder(): void {}
-
   ngOnInit(): void {
-    this.userData = this.service.userData;
-    this.orders = this.service.orders;
-    this.isButtonVisible = this.userData.type === 'customer';
-    this.pendingOrders = this.orders.filter((e) => e.status === 'In process');
-    const completedOrders = this.orders.filter((e) => e.status === 'Completed');
     const months = [
       'Jan',
       'Feb',
@@ -97,30 +102,60 @@ export class SummaryComponent implements OnInit {
       'Dec',
     ];
 
-    months.forEach((value) => {
-      this.allOrdersMap[value] = 0;
-      this.pendingOrdersMap[value] = 0;
-      this.completedOrdersMap[value] = 0;
-    });
-
-    this.orders.forEach((value) => {
-      const month = value.emited.toString().split(' ')[1];
-      this.allOrdersMap[month] += 1;
-    });
-
-    this.pendingOrders.forEach((value) => {
-      const month = value.emited.toString().split(' ')[1];
-      this.pendingOrdersMap[month] += 1;
-    });
-
-    completedOrders.forEach((value) => {
-      const month = value.emited.toString().split(' ')[1];
-      this.completedOrdersMap[month] += 1;
-    });
-
-    this.chartLabels = months;
-    if (this.isBusiness) {
-      this.services = this.service.services;
+    if (this.service.userData.type === 'business') {
+      this.isBusiness = true;
+      this.apollo
+        .query<ServiceDataResponse>({
+          query: GET_SERVICES,
+          variables: { userID: this.service.userId },
+        })
+        .subscribe((response) => {
+          this.service.services = response.data.getServiceByUser;
+          this.services = this.service.services;
+          this.detector.markForCheck();
+        });
+    } else {
+      this.isBusiness = false;
     }
+
+    this.apollo
+      .query<OrderDataResponse>({
+        query: GET_ORDERS_BY_USER,
+        variables: { userID: this.service.userId },
+      })
+      .subscribe((res) => {
+        this.service.orders = res.data.getOrdersByUser;
+        this.orders = this.service.orders;
+        this.pendingOrders = this.orders.filter(
+          (e) => e.status === 'In process'
+        );
+        const completedOrders = this.orders.filter(
+          (e) => e.status === 'Completed'
+        );
+
+        months.forEach((value) => {
+          this.allOrdersMap[value] = 0;
+          this.pendingOrdersMap[value] = 0;
+          this.completedOrdersMap[value] = 0;
+        });
+        this.orders.forEach((value) => {
+          const month = Number(value.emited.toString().split('-')[1]);
+          this.allOrdersMap[months[month - 1]] += 1;
+        });
+        this.pendingOrders.forEach((value) => {
+          const month = Number(value.emited.toString().split('-')[1]);
+          this.pendingOrdersMap[months[month - 1]] += 1;
+        });
+
+        completedOrders.forEach((value) => {
+          const month = Number(value.emited.toString().split('-')[1]);
+          this.completedOrdersMap[months[month - 1]] += 1;
+        });
+        this.completed = true;
+        this.detector.markForCheck();
+      });
+    this.userData = this.service.userData;
+    this.isButtonVisible = this.userData.type === 'customer';
+    this.chartLabels = months;
   }
 }

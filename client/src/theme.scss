@@ -2,7 +2,7 @@
 @include mat-core();
 
 $delivery-app-primary: mat-palette($mat-blue, 400, 700, A200);
-$delivery-app-accent: mat-palette($mat-light-green, A400);
+$delivery-app-accent: mat-palette($mat-green, 50);
 $delivery-app-warn: mat-palette($mat-red);
 
 $delivery-app-theme: mat-light-theme(

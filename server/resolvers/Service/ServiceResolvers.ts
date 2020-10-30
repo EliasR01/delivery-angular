@@ -49,28 +49,52 @@ export class ServiceResolver {
   async createService(
     @Arg('serviceData') serviceData: ServiceData
   ): Promise<Service> {
-    const returnUser = await db
-      .collection('user')
-      .findOne(new ObjectID(serviceData.user));
-    if (!returnUser) throw new Error('User does not exists!');
-    const service = await db.collection('service').insertOne(serviceData);
-    const { user, ...objectWithoutUser } = service.ops[0];
-    const returnObject = { ...objectWithoutUser, user: returnUser._id };
-    return returnObject;
+    try {
+      const { products, ...createServiceData } = serviceData;
+
+      const service = await db
+        .collection('service')
+        .insertOne(createServiceData);
+      // console.log(service);
+      const createProductData = serviceData.products.map((value) => {
+        const productData = { ...value, service: service.ops[0]._id };
+        return productData;
+      });
+      const insertedProducts = await db
+        .collection('product')
+        .insertMany(createProductData);
+
+      const productsId = insertedProducts.ops.map((value: any) => value._id);
+      const updateServiceData = { ...createServiceData, products: productsId };
+      await db
+        .collection('service')
+        .findOneAndUpdate(
+          { _id: new ObjectID(service.ops[0]._id) },
+          { $set: updateServiceData },
+          { returnOriginal: false }
+        );
+
+      return service.ops[0];
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   @Mutation(() => Service)
   async deleteService(
     @Arg('where') where: ServiceWhereUniqueData
   ): Promise<Service> {
-    const service = await db
-      .collection('service')
-      .findOneAndDelete({ _id: new ObjectID(where._id) });
+    try {
+      const service = await db
+        .collection('service')
+        .findOneAndDelete({ _id: new ObjectID(where._id) });
 
-    // await db
-    //   .collection('product')
-    //   .deteleMany({ _id: { $in: service.value.products } });
-    console.log(service);
-    return service.value;
+      await db
+        .collection('product')
+        .deleteMany({ _id: { $in: service.value.products } });
+      return service.value;
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 }

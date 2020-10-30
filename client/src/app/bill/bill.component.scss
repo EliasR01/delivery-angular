@@ -1,10 +1,11 @@
-.bill {
-  width: 30%;
+#bill {
+  width: 60%;
   margin: auto;
   display: flex;
   flex-flow: column;
   justify-content: center;
   align-items: center;
+  background-color: white;
 }
 
 .bill-title {
@@ -18,7 +19,7 @@
   width: 100%;
   display: flex;
   margin-bottom: 20px;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
 }
 

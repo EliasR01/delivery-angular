@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DashboardService } from '../dashboard.service';
-import { Apollo, QueryRef } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { GET_SERVICES_BY_TYPE } from '../queries/getServicesByType';
 import { GET_PRODUCTS_BY_IDS } from '../queries/getProductsById';
 import { GET_USER_BY_ID } from '../queries/getUserById';
@@ -23,59 +23,62 @@ export class OrderComponent implements OnInit {
   takeOrder: boolean = false;
   servicesData: any;
   orderData: any;
-  serviceQuery: QueryRef<any>;
-  productQuery: QueryRef<any>;
-  userQuery: QueryRef<any>;
 
   orderForm = new FormGroup({
     typeService: new FormControl(''),
   });
 
-  constructor(private service: DashboardService, private apollo: Apollo) {}
+  constructor(
+    private service: DashboardService,
+    private apollo: Apollo,
+    private detector: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.typeServices = this.service.typeService;
-    this.serviceQuery = this.apollo.watchQuery<ServiceDataResponse>({
-      query: GET_SERVICES_BY_TYPE,
-      variables: { type: '' },
-    });
-    this.productQuery = this.apollo.watchQuery<ProductDataResponse>({
-      query: GET_PRODUCTS_BY_IDS,
-      variables: { _id: { products: '' } },
-    });
-    this.userQuery = this.apollo.watchQuery<UserDataResponse>({
-      query: GET_USER_BY_ID,
-      variables: { data: { _id: '' } },
-    });
+    console.log(this.service.typeService);
   }
 
   selectType(): void {
     this.selectedType = true;
-
-    this.serviceQuery
-      .refetch({ type: this.orderForm.value.typeService })
-      .then((res) => {
-        this.servicesData = res.data.getServiceByType;
+    this.apollo
+      .query<ServiceDataResponse>({
+        query: GET_SERVICES_BY_TYPE,
+        variables: { type: this.orderForm.value.typeService },
+      })
+      .subscribe((response) => {
+        this.servicesData = response.data.getServiceByType;
+        this.detector.markForCheck();
       });
   }
 
   onSelectService(data: any): void {
     this.selectedService = true;
-    this.userQuery.refetch({ data: { _id: data.user } }).then((res) => {
-      const productData = {
-        _id: data.products,
-      };
-      this.productQuery
-        .refetch({ products: { _id: productData } })
-        .then((response) => {
-          this.orderData = {
-            service: data,
-            user: res.data.getUserById,
-            products: response.data.getProductsById,
-          };
-          this.takeOrder = true;
-        });
-    });
+
+    this.apollo
+      .query<UserDataResponse>({
+        query: GET_USER_BY_ID,
+        variables: { data: { _id: data.user } },
+      })
+      .subscribe((res) => {
+        const productData = {
+          _id: data.products,
+        };
+        this.apollo
+          .query<ProductDataResponse>({
+            query: GET_PRODUCTS_BY_IDS,
+            variables: { products: productData },
+          })
+          .subscribe((response) => {
+            this.orderData = {
+              service: data,
+              user: res.data.getUserById,
+              products: response.data.getProductsById,
+            };
+            this.takeOrder = true;
+            this.detector.markForCheck();
+          });
+      });
   }
 
   toggleTakeOrder(status: boolean): void {

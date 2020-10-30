@@ -1,7 +1,11 @@
 import { Resolver, Query, Mutation, Arg } from 'type-graphql';
 import { db } from '../../mongo';
 import { ObjectID } from 'mongodb';
-import { ProductData, ProductWhereUniqueData } from './ProductInput';
+import {
+  ProductData,
+  ProductWhereUniqueData,
+  ProductWhereServiceData,
+} from './ProductInput';
 import { Product } from './Product';
 
 @Resolver()
@@ -71,24 +75,39 @@ export class ProductResolver {
       const product = await db
         .collection('product')
         .insertMany(productData.products);
+      const productsId = product.ops.map((value: any) => value._id);
+      await db.collection('service').findOneAndUpdate(
+        {
+          _id: new ObjectID(productData.products[0].service),
+        },
+        { $addToSet: { products: { $each: productsId } } }
+      );
       return product.ops;
     } catch (err) {
+      console.error(err);
       throw new Error(err);
     }
   }
 
-  @Mutation(() => Product)
+  @Mutation(() => Boolean)
   async deleteProduct(
-    @Arg('where') where: ProductWhereUniqueData
-  ): Promise<Product> {
+    @Arg('where') where: ProductWhereUniqueData,
+    @Arg('service') service: ProductWhereServiceData
+  ): Promise<Boolean> {
     try {
-      const productsId = where._id.map((value) => new ObjectID(value));
-      const product = await db
-        .collection('product')
-        .deleteMany({ _id: { $in: productsId } });
-      console.log(product);
-      return product.value;
+      const productId = where._id.map((value: any) => new ObjectID(value));
+      await db.collection('product').deleteMany({ _id: { $in: productId } });
+      await db.collection('service').findOneAndUpdate(
+        {
+          _id: new ObjectID(service.service),
+        },
+        {
+          $pull: { products: { $in: productId } },
+        }
+      );
+      return true;
     } catch (err) {
+      console.error(err);
       throw new Error(err);
     }
   }

@@ -29,6 +29,7 @@ export class LineChartComponent implements OnInit {
         {
           ticks: {
             beginAtZero: true,
+            stepSize: 1,
           },
         },
       ],

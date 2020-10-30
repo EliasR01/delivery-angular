@@ -1,3 +1,4 @@
+<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 <div class="card-container">
   <mat-card>
     <form [formGroup]="serviceForm" class="service-card">
@@ -73,7 +74,7 @@
       <button
         mat-button
         type="submit"
-        color="accent"
+        color="primary"
         [disabled]="!serviceForm.valid"
       >
         Add
@@ -97,10 +98,10 @@
   </mat-card>
 </div>
 <div class="card-buttons-container">
-  <button mat-button color="accent" (click)="back()">Back</button>
+  <button mat-button color="primary" (click)="back()">Back</button>
   <button
     mat-button
-    color="accent"
+    color="primary"
     (click)="submit()"
     [disabled]="!isButtonEnabled"
   >

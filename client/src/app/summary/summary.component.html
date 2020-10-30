@@ -12,7 +12,9 @@
         <span><b>type:</b> {{ userData.type }}</span>
         <span><b>Country:</b> {{ userData.country }}</span>
         <span><b>Address:</b> {{ userData.address }}</span>
-        <button mat-button color="accent" (click)="editUserInfo()">Edit</button>
+        <button mat-button color="primary" (click)="editUserInfo()">
+          Edit
+        </button>
       </div>
     </mat-card>
     <mat-card>
@@ -35,7 +37,7 @@
         <button
           *ngIf="isButtonVisible"
           mat-button
-          color="accent"
+          color="primary"
           (click)="newOrder()"
         >
           New Order
@@ -49,6 +51,7 @@
         <mat-card-title>Transaction History</mat-card-title>
       </mat-card-header>
       <app-line-chart
+        *ngIf="completed"
         [allOrders]="allOrdersMap"
         [pendingOrders]="pendingOrdersMap"
         [completedOrders]="completedOrdersMap"
@@ -76,8 +79,8 @@
       <mat-card-header>
         <mat-card-title>All Services</mat-card-title>
       </mat-card-header>
-      <cdk-virtual-scroll-viewport itemSize="50" class="order-scroll">
-        <div *ngFor="let service of services" class="orders">
+      <cdk-virtual-scroll-viewport itemSize="50" class="service-scroll">
+        <div *ngFor="let service of services" class="services">
           <ul (click)="editService(service)">
             <li>
               <span><b>Name: </b> {{ service.name }}</span>
@@ -87,6 +90,9 @@
           </ul>
         </div>
       </cdk-virtual-scroll-viewport>
+      <div class="service-button">
+        <button mat-button color="primary" (click)="newService()">New</button>
+      </div>
     </mat-card>
   </div>
 </div>

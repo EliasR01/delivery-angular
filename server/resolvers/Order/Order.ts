@@ -19,5 +19,7 @@ export class Order {
   @Field()
   user: string;
   @Field()
-  bussiness: string;
+  business: string;
+  // @Field()
+  // fileUrl: string;
 }

@@ -11,7 +11,8 @@ export const GET_ORDERS_BY_USER = gql`
       status
       products
       user
-      bussiness
+      business
+      # fileUrl
     }
   }
 `;

@@ -1,4 +1,5 @@
-<div class="bill">
+<div id="bill" #template>
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
   <div class="bill-title">
     <h1>Bill Summary</h1>
   </div>
@@ -41,6 +42,6 @@
   </div>
 </div>
 <div class="bill-button">
-  <button mat-button color="accent" (click)="submit()">Submit</button>
-  <button mat-button color="accent" (click)="back()">Back</button>
+  <button mat-button color="primary" (click)="submit()">Submit</button>
+  <button mat-button color="primary" (click)="back()">Back</button>
 </div>

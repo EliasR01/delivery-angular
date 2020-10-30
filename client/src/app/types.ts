@@ -24,7 +24,7 @@ export class TypeService {
 }
 
 export class Product {
-  _id: string;
+  _id?: string;
   name: string;
   stock: Number;
   description: string;
@@ -42,4 +42,5 @@ export class Order {
   products: [string];
   user: string;
   bussiness: string;
+  fileUrl: string;
 }

@@ -20,13 +20,19 @@
     <span>Products</span>
     <cdk-virtual-scroll-viewport itemSize="50" class="order-products-scroll">
       <div *ngFor="let product of products">
-        <span>{{ product.name }}</span>
+        <ul>
+          <li>
+            {{ product.name }}
+          </li>
+        </ul>
       </div>
     </cdk-virtual-scroll-viewport>
-    <button mat-button color="accent">Download PDF</button>
   </form>
 </mat-dialog-content>
+<div *ngIf="isError" class="error">
+  <span>{{ errorMessage }}</span>
+</div>
 <mat-dialog-actions align="center">
-  <button mat-button color="accent" mat-dialog-close>Close</button>
-  <button mat-button color="accent">Update Order</button>
+  <button mat-button color="primary" mat-dialog-close>Close</button>
+  <button mat-button color="primary" (click)="update()">Update Order</button>
 </mat-dialog-actions>

@@ -64,7 +64,11 @@ export class RegisterComponent implements OnInit {
       this.loading = true;
 
       this.service
-        .uploadFile(this.userForm.value.file[0], this.userForm.value.username)
+        .uploadFile(
+          this.userForm.value.file[0],
+          this.userForm.value.username,
+          'IMAGE'
+        )
         .toPromise()
         .then((e) => {
           this.loading = true;

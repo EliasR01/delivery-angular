@@ -25,8 +25,26 @@ export class OrderResolver {
   }
 
   @Query(() => [Order])
-  async getOrdersByUser(@Arg('userID') userID: string): Promise<Order> {
-    return await db.collection('order').find({ user: userID }).toArray();
+  async getOrdersByUser(
+    @Arg('userID') userID: string
+    // @Ctx() { res }: any
+  ): Promise<Order> {
+    try {
+      // console.log(res);
+      const user = await db
+        .collection('user')
+        .findOne({ _id: new ObjectID(userID) });
+      if (user.type === 'customer') {
+        return await db.collection('order').find({ user: userID }).toArray();
+      } else {
+        return await db
+          .collection('order')
+          .find({ business: userID })
+          .toArray();
+      }
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   @Mutation(() => Order)
@@ -57,7 +75,7 @@ export class OrderResolver {
           _id: {
             $in: [
               new ObjectID(orderData.user),
-              new ObjectID(orderData.bussiness),
+              new ObjectID(orderData.business),
             ],
           },
         },
@@ -69,14 +87,16 @@ export class OrderResolver {
     }
   }
 
-  @Mutation(() => Order)
-  async deleteOrder(@Arg('where') where: OrderWhereUniqueData): Promise<Order> {
+  @Mutation(() => Boolean)
+  async deleteOrder(
+    @Arg('where') where: OrderWhereUniqueData
+  ): Promise<Boolean> {
     try {
       const orderId = where._id.map((value) => new ObjectID(value));
-      const order = await db
+      await db
         .collection('order')
-        .findAndDelete({ _id: { $in: orderId } });
-      return order;
+        .deleteMany({ _id: { $in: orderId } }, { returnOriginal: true });
+      return true;
     } catch (err) {
       throw new Error(err);
     }

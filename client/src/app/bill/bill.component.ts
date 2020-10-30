@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { PeriodicElement } from '../interfaces';
 
 @Component({
@@ -11,8 +18,10 @@ export class BillComponent implements OnInit {
   @Input() client: string;
   @Input() sender: string;
   @Input() total: number;
+  @Input() loading: Boolean;
   @Output() submitBill = new EventEmitter();
   @Output() toggleBill = new EventEmitter();
+  @ViewChild('template') template: any;
   constructor() {}
 
   displayedColumns: string[] = ['Description', 'Amount', 'Unit Price', 'Total'];
