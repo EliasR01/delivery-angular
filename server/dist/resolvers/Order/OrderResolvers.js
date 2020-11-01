@@ -21,6 +21,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.OrderResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const mongo_1 = require("../../mongo");
 const mongodb_1 = require("mongodb");
@@ -45,7 +46,23 @@ let OrderResolver = class OrderResolver {
     }
     getOrdersByUser(userID) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield mongo_1.db.collection('order').find({ user: userID }).toArray();
+            try {
+                const user = yield mongo_1.db
+                    .collection('user')
+                    .findOne({ _id: new mongodb_1.ObjectID(userID) });
+                if (user.type === 'customer') {
+                    return yield mongo_1.db.collection('order').find({ user: userID }).toArray();
+                }
+                else {
+                    return yield mongo_1.db
+                        .collection('order')
+                        .find({ business: userID })
+                        .toArray();
+                }
+            }
+            catch (err) {
+                throw new Error(err);
+            }
         });
     }
     updateOrder(where, orderData) {
@@ -69,7 +86,7 @@ let OrderResolver = class OrderResolver {
                     _id: {
                         $in: [
                             new mongodb_1.ObjectID(orderData.user),
-                            new mongodb_1.ObjectID(orderData.bussiness),
+                            new mongodb_1.ObjectID(orderData.business),
                         ],
                     },
                 }, { $addToSet: { orders: new mongodb_1.ObjectID(order.ops[0]._id).toString() } });
@@ -84,10 +101,10 @@ let OrderResolver = class OrderResolver {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const orderId = where._id.map((value) => new mongodb_1.ObjectID(value));
-                const order = yield mongo_1.db
+                yield mongo_1.db
                     .collection('order')
-                    .findAndDelete({ _id: { $in: orderId } });
-                return order;
+                    .deleteMany({ _id: { $in: orderId } }, { returnOriginal: true });
+                return true;
             }
             catch (err) {
                 throw new Error(err);
@@ -139,7 +156,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrderResolver.prototype, "createOrder", null);
 __decorate([
-    type_graphql_1.Mutation(() => Order_1.Order),
+    type_graphql_1.Mutation(() => Boolean),
     __param(0, type_graphql_1.Arg('where')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [OrderInput_1.OrderWhereUniqueData]),

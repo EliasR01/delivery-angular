@@ -5,20 +5,15 @@ import { buildSchema } from 'type-graphql';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Response, Request } from 'express';
-import { verify } from 'jsonwebtoken';
-import { ObjectID } from 'mongodb';
-import { MongoDb, db } from './mongo';
+import { MongoDb } from './mongo';
 import { UserResolver } from './resolvers/User/UserResolvers';
 import { OrderResolver } from './resolvers/Order/OrderResolvers';
 import { ServiceResolver } from './resolvers/Service/ServiceResolvers';
 import { ProductResolver } from './resolvers/Product/ProductResolvers';
 import { TypeServiceResolver } from './resolvers/TypeService/TypeServiceResolvers';
-import { createAccessToken, createRefreshToken } from './auth';
-import { sendRefreshToken } from './sendRefreshToken';
 import formidable from 'formidable';
 import fs from 'fs-extra';
 import * as nodemailer from 'nodemailer';
-//mongodb://127.0.0.1:27017
 (async () => {
   try {
     const app = express();
@@ -39,30 +34,6 @@ import * as nodemailer from 'nodemailer';
     );
 
     app.use(cookieParser());
-    app.post('/refresh_token_id', async (req, res) => {
-      const token = req.cookies.tid;
-      if (!token) return res.send({ ok: false, accessToken: '' });
-      let payload: any = null;
-      try {
-        payload = verify(token, process.env.REFRESH_TOKEN_SECRET!);
-      } catch (err) {
-        console.log(err);
-        return res.send({ ok: false, accessToken: '' });
-      }
-
-      const user = await db
-        .collection('user')
-        .findOne(new ObjectID(payload.userId));
-
-      if (!user) res.send({ ok: false, accessToken: '' });
-
-      if (user.tokenVersion !== payload.tokenVersion)
-        return res.send({ ok: false, accessToken: '' });
-
-      sendRefreshToken(res, createRefreshToken(user._id));
-
-      return res.send({ ok: true, accessToken: createAccessToken(user._id) });
-    });
 
     app.post('/uploadFile', async (req: Request, res: Response) => {
       let newPath: string;
@@ -78,7 +49,7 @@ import * as nodemailer from 'nodemailer';
           throw new Error(err);
         } else {
           const oldPath = files.order.path;
-          newPath = `${path}-${userEmail}-${Date.now()}`;
+          newPath = `${path}${userEmail}-${Date.now()}.pdf`;
           fs.rename(oldPath, newPath, async (err) => {
             if (err) throw err;
             const transporter = nodemailer.createTransport({
@@ -119,10 +90,10 @@ import * as nodemailer from 'nodemailer';
                 text: `Greetings. Here is the last ordered bill.`,
                 attachments,
               })
+              .then((res) => console.log(res))
               .catch((err) => {
                 console.error(err);
               });
-            console.log(newPath);
             fs.unlink(newPath, (err) => console.error(err));
             res.end();
           });

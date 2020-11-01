@@ -32,6 +32,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ServiceResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const mongo_1 = require("../../mongo");
 const mongodb_1 = require("mongodb");
@@ -70,24 +71,44 @@ let ServiceResolver = class ServiceResolver {
     }
     createService(serviceData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const service = yield mongo_1.db.collection('service').insertOne(serviceData);
-            const returnUser = yield mongo_1.db
-                .collection('user')
-                .findOne(new mongodb_1.ObjectID(serviceData.user));
-            if (!returnUser)
-                throw new Error('User does not exists!');
-            const _a = service.ops[0], { user } = _a, objectWithoutUser = __rest(_a, ["user"]);
-            const returnObject = Object.assign(Object.assign({}, objectWithoutUser), { user: returnUser._id });
-            console.log(returnObject);
-            return returnObject;
+            try {
+                const { products } = serviceData, createServiceData = __rest(serviceData, ["products"]);
+                const service = yield mongo_1.db
+                    .collection('service')
+                    .insertOne(createServiceData);
+                const createProductData = serviceData.products.map((value) => {
+                    const productData = Object.assign(Object.assign({}, value), { service: service.ops[0]._id });
+                    return productData;
+                });
+                const insertedProducts = yield mongo_1.db
+                    .collection('product')
+                    .insertMany(createProductData);
+                const productsId = insertedProducts.ops.map((value) => value._id);
+                const updateServiceData = Object.assign(Object.assign({}, createServiceData), { products: productsId });
+                yield mongo_1.db
+                    .collection('service')
+                    .findOneAndUpdate({ _id: new mongodb_1.ObjectID(service.ops[0]._id) }, { $set: updateServiceData }, { returnOriginal: false });
+                return service.ops[0];
+            }
+            catch (err) {
+                throw new Error(err);
+            }
         });
     }
     deleteService(where) {
         return __awaiter(this, void 0, void 0, function* () {
-            const service = yield mongo_1.db
-                .collection('service')
-                .findOneAndDelete({ _id: new mongodb_1.ObjectID(where._id) });
-            return service.value;
+            try {
+                const service = yield mongo_1.db
+                    .collection('service')
+                    .findOneAndDelete({ _id: new mongodb_1.ObjectID(where._id) });
+                yield mongo_1.db
+                    .collection('product')
+                    .deleteMany({ _id: { $in: service.value.products } });
+                return service.value;
+            }
+            catch (err) {
+                throw new Error(err);
+            }
         });
     }
 };

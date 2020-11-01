@@ -11,6 +11,7 @@ import { DashboardService } from '../dashboard.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { User } from '../types';
 import { CREATE_ORDER } from '../mutations/createOrder';
+import { UPDATE_PRODUCT } from '../mutations/updateProduct';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { DialogComponent } from '../dialog/dialog.component';
@@ -75,7 +76,9 @@ export class TakeOrderComponent implements OnInit {
   }
 
   addProduct(event: any, product: any, amount: any, checkbox: any): void {
-    const productData = { ...product, amount: amount.value };
+    const { __typename, ...data } = product;
+    const products = { ...data, amount: Number(amount.value) };
+    const productData = { ...products, service: this.orderData.service._id };
     if (!checkbox.checked) {
       const index = this.containsProduct(productData.name);
       this.selectedProducts.splice(index, 1);
@@ -132,15 +135,9 @@ export class TakeOrderComponent implements OnInit {
     return await html2canvas(template).then(async (canvas) => {
       try {
         const imgWidth = 200;
-        // const pageHeight = 190;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         const xAxis = 2;
         const yAxis = 50;
-        // const options = {
-        //   size: '70px',
-        //   background: '#fff',
-        //   pagesplit: false
-        // }
         const doc = new jsPDF();
         const image = canvas.toDataURL('image/png');
         doc.addImage(image, 'PNG', xAxis, yAxis, imgWidth, imgHeight);
@@ -187,28 +184,25 @@ export class TakeOrderComponent implements OnInit {
             },
           ],
         })
-        .subscribe((response) => {
+        .subscribe(() => {
           try {
-            // const params = {
-            //   from_name: 'Delivery Service',
-            //   subject: `Submited new order in ${this.orderData.service.name}`,
-            //   message_html: document.getElementById('bill').innerHTML,
-            //   content: this.file,
-            // };
-            // const templateParamsBussiness = {
-            //   ...params,
-            //   to: this.orderData.user.email,
-            // };
-            // this.service.sendEmail(templateParamsBussiness);
-            // const templateParamsUser = {
-            //   ...params,
-            //   to: this.userInformation.email,
-            // };
-            // this.service.sendEmail(templateParamsUser);
-            this.back();
-            this.dialog.open(DialogComponent, {
-              data: 'Order successfully loaded!',
-            });
+            this.apollo
+              .mutate({
+                mutation: UPDATE_PRODUCT,
+                variables: { productData: { products: this.selectedProducts } },
+              })
+              .toPromise()
+              .then(() => {
+                this.back();
+                this.dialog.open(DialogComponent, {
+                  data: 'Order successfully loaded!',
+                });
+              })
+              .catch(() => {
+                this.dialog.open(DialogComponent, {
+                  data: 'There was an error updating the product stock',
+                });
+              });
           } catch (err) {
             this.dialog.open(DialogComponent, {
               data: 'Something went wrong. Please contact the support team',

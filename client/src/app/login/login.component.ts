@@ -58,7 +58,6 @@ export class LoginComponent implements OnInit {
             .then((res) => {
               if (res.data.getUserById) {
                 this.service.userData = res.data.getUserById;
-                // this.router.navigate(['dashboard']);
                 this.router.navigate(['dashboard/summary']);
               } else {
                 this.message =
@@ -70,10 +69,10 @@ export class LoginComponent implements OnInit {
         }
       })
       .catch((err) => {
-        console.log(err);
         this.loading = false;
+        const error = err.message.split(':')[1];
         this.dialog.open(DialogComponent, {
-          data: err,
+          data: error,
         });
       });
   }

@@ -10,98 +10,59 @@ import { getAccessToken, setAccessToken } from './utils';
 //import jwtDecode from 'jwt-decode';
 
 export function createApollo(httpLink: HttpLink) {
-  let isRefreshedToken = false;
-  let pendingRequests = [];
-
   const uri = 'http://localhost:4000'; // <-- add the URL of the GraphQL server here
-  const errorLink = onError(
-    ({ graphQLErrors, networkError, operation, forward }) => {
-      if (graphQLErrors) {
-        for (let err of graphQLErrors) {
-          if (err.extensions.code === 'UNAUTHENTICATED') {
-            let forward$: any;
-            if (!isRefreshedToken) {
-              isRefreshedToken = true;
-              forward$ = fromPromise(
-                fetch(`${uri}/refresh_token_id`, {
-                  method: 'POST',
-                  credentials: 'include',
-                })
-                  .then((res) => {
-                    res.json().then(({ accessToken }) => {
-                      //Should set the accessToken in dashboard.serice with the value returned from response.
-                      setAccessToken(accessToken);
-                    });
-                  })
-                  .catch((Error) => {
-                    pendingRequests = [];
-                    return Error;
-                  })
-                  .finally(() => {
-                    isRefreshedToken = false;
-                  })
-              ).filter((value) => Boolean(value));
-            } else {
-              forward$ = fromPromise(
-                new Promise((resolve) => {
-                  pendingRequests.push(() => resolve);
-                })
-              );
-            }
+  const errorLink = onError(({ graphQLErrors, networkError }) => {
+    if (graphQLErrors) {
+      for (let err of graphQLErrors) {
+        if (err.message.split(':')[1].split(' ')[1] !== 'Invalid') {
+          const templateParams = {
+            from_name: 'eliasalejo01@gmail.com',
+            to_name: 'eliasalejo01@gmail.com',
+            subject: 'Error in delivery app',
+            message_html: `There is a GraphQL error in delivery application: ${err.message}, location: ${err.locations} - ${err.path}`,
+          };
 
-            return forward$.flatMap(() => forward(operation));
-          } else {
-            const templateParams = {
-              from_name: 'eliasalejo01@gmail.com',
-              to_name: 'eliasalejo01@gmail.com',
-              subject: 'Error in delivery app',
-              message_html: `There is a GraphQL error in delivery application: ${err.message}, location: ${err.locations} - ${err.path}`,
+          emailjs
+            .send(
+              'delivery-app-service',
+              'template_smXCjRxC',
+              templateParams,
+              'user_eJv2ZcvYpPAAY03vAk0sV'
+            )
+            .then((result: EmailJSResponseStatus) => {
+              console.log(result.text);
+            }),
+            (error: any) => {
+              console.log(error.text);
             };
-
-            emailjs
-              .send(
-                'delivery-app-service',
-                'template_smXCjRxC',
-                templateParams,
-                'user_eJv2ZcvYpPAAY03vAk0sV'
-              )
-              .then((result: EmailJSResponseStatus) => {
-                console.log(result.text);
-              }),
-              (error: any) => {
-                console.log(error.text);
-              };
-          }
         }
       }
-      if (networkError) {
-        const templateParams = {
-          from_name: 'eliasalejo01@gmail.com',
-          to_name: 'eliasalejo01@gmail.com',
-          subject: 'Error in delivery app',
-          message_html: `There is a network error: ${networkError.message}`,
-        };
-
-        emailjs
-          .send(
-            'delivery-app-service',
-            'template_smXCjRxC',
-            templateParams,
-            'user_eJv2ZcvYpPAAY03vAk0sV'
-          )
-          .then((result: EmailJSResponseStatus) => {
-            console.log(result.text);
-          }),
-          (error: any) => {
-            console.log(error.text);
-          };
-      }
     }
-  );
+    if (networkError) {
+      const templateParams = {
+        from_name: 'eliasalejo01@gmail.com',
+        to_name: 'eliasalejo01@gmail.com',
+        subject: 'Error in delivery app',
+        message_html: `There is a network error: ${networkError.message}`,
+      };
+
+      emailjs
+        .send(
+          'delivery-app-service',
+          'template_smXCjRxC',
+          templateParams,
+          'user_eJv2ZcvYpPAAY03vAk0sV'
+        )
+        .then((result: EmailJSResponseStatus) => {
+          console.log(result.text);
+        }),
+        (error: any) => {
+          console.log(error.text);
+        };
+    }
+  });
 
   const authMiddleware = new ApolloLink((operation: any, forward: any) => {
-    // const op = new Observable((observer: any) => {
-    // let handle: any;
     const accessToken = getAccessToken();
     if (accessToken) {
       operation.setContext({
@@ -110,30 +71,6 @@ export function createApollo(httpLink: HttpLink) {
         },
       });
     }
-    /*Promise.resolve(operation)
-        .then((operation) => {
-          const accessToken = this.service.getAccessToken();
-          if (accessToken) {
-            operation.setContext({
-              headers: {
-                authentication: `bearer ${accessToken}`,
-              },
-            });
-          }
-        })
-        .then(() => {
-          handle = forward(operation).subscribe({
-            next: observer.next.bind(observer),
-            error: observer.error.bind(observer),
-            complete: observer.complete.bind(observer),
-          });
-        })
-        .catch(observer.error.bind(observer));
-
-      return () => {
-        if (handle) handle.unsubscribe();
-      };*/
-    // })
     return forward(operation);
   });
 

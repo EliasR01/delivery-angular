@@ -21,6 +21,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const mongo_1 = require("../../mongo");
 const mongodb_1 = require("mongodb");
@@ -64,13 +65,22 @@ let ProductResolver = class ProductResolver {
             }
         });
     }
-    updateProduct(where, productData) {
+    updateProduct(productData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const product = yield mongo_1.db
-                    .collection('product')
-                    .findOneAndUpdate({ _id: new mongodb_1.ObjectID(where._id[0]) }, { $set: productData }, { returnOriginal: false });
-                return product.value;
+                productData.products.map((value) => __awaiter(this, void 0, void 0, function* () {
+                    const product = {
+                        name: value.name,
+                        stock: value.stock - value.amount,
+                        price: value.price,
+                        description: value.description,
+                        service: value.service,
+                    };
+                    yield mongo_1.db
+                        .collection('product')
+                        .updateOne({ _id: new mongodb_1.ObjectID(value._id) }, { $set: product });
+                }));
+                return true;
             }
             catch (err) {
                 throw new Error(err);
@@ -80,24 +90,35 @@ let ProductResolver = class ProductResolver {
     createProduct(productData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const product = yield mongo_1.db.collection('product').insertMany(productData);
-                return product.ops[0];
+                const product = yield mongo_1.db
+                    .collection('product')
+                    .insertMany(productData.products);
+                const productsId = product.ops.map((value) => value._id);
+                yield mongo_1.db.collection('service').findOneAndUpdate({
+                    _id: new mongodb_1.ObjectID(productData.products[0].service),
+                }, { $addToSet: { products: { $each: productsId } } });
+                return product.ops;
             }
             catch (err) {
+                console.error(err);
                 throw new Error(err);
             }
         });
     }
-    deleteProduct(where) {
+    deleteProduct(where, service) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const productsId = where._id.map((value) => new mongodb_1.ObjectID(value));
-                const product = yield mongo_1.db
-                    .collection('product')
-                    .findAndDelete({ _id: { $in: productsId } });
-                return product;
+                const productId = where._id.map((value) => new mongodb_1.ObjectID(value));
+                yield mongo_1.db.collection('product').deleteMany({ _id: { $in: productId } });
+                yield mongo_1.db.collection('service').findOneAndUpdate({
+                    _id: new mongodb_1.ObjectID(service.service),
+                }, {
+                    $pull: { products: { $in: productId } },
+                });
+                return true;
             }
             catch (err) {
+                console.error(err);
                 throw new Error(err);
             }
         });
@@ -124,26 +145,26 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "getProductsByService", null);
 __decorate([
-    type_graphql_1.Mutation(() => Product_1.Product),
-    __param(0, type_graphql_1.Arg('where')),
-    __param(1, type_graphql_1.Arg('productData')),
+    type_graphql_1.Mutation(() => Boolean),
+    __param(0, type_graphql_1.Arg('productData')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [ProductInput_1.ProductWhereUniqueData,
-        ProductInput_1.ProductData]),
+    __metadata("design:paramtypes", [ProductInput_1.ProductData]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "updateProduct", null);
 __decorate([
-    type_graphql_1.Mutation(() => Product_1.Product),
+    type_graphql_1.Mutation(() => [Product_1.Product]),
     __param(0, type_graphql_1.Arg('productData')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [ProductInput_1.ProductData]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "createProduct", null);
 __decorate([
-    type_graphql_1.Mutation(() => Product_1.Product),
+    type_graphql_1.Mutation(() => Boolean),
     __param(0, type_graphql_1.Arg('where')),
+    __param(1, type_graphql_1.Arg('service')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [ProductInput_1.ProductWhereUniqueData]),
+    __metadata("design:paramtypes", [ProductInput_1.ProductWhereUniqueData,
+        ProductInput_1.ProductWhereServiceData]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "deleteProduct", null);
 ProductResolver = __decorate([

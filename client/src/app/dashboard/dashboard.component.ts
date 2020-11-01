@@ -41,21 +41,10 @@ export class DashboardComponent implements OnInit {
       })
       .toPromise()
       .then((response) => {
-        this.apollo
-          .query<TypeServiceResponse>({ query: GET_TYPE_SERVICE })
-          .toPromise()
-          .then((res) => {
-            this.service.userData = response.data.getUserById;
-            this.service.typeService = res.data.getTypeOfService;
-            this.setRoutes();
-            this.detector.markForCheck();
-            this.loading = false;
-          })
-          .catch(() => {
-            this.message =
-              'Something went wrong, please contact the support team';
-            this.dialog.open(DialogComponent, { data: this.message });
-          });
+        this.service.userData = response.data.getUserById;
+        this.setRoutes();
+        this.detector.markForCheck();
+        this.loading = false;
       })
       .catch(() => {
         this.message = 'Something went wrong, please contact the support team';

@@ -53,9 +53,18 @@ export class UserResolver {
   @Mutation(() => User)
   async updateUser(
     @Arg('where') where: UserWhereUniqueData,
-    @Arg('userData') userData: UserData
+    @Arg('userData') userData: UserData,
+    @Arg('currentPassword') currentPassword: string
   ): Promise<User> {
     try {
+      const currentUserData = await db
+        .collection('user')
+        .findOne({ _id: new ObjectID(where._id) });
+
+      const isEqual = await compare(currentPassword, currentUserData.password);
+
+      if (!isEqual) throw new Error('Current password is not correct!');
+
       const salt = genSaltSync(10);
       const hashedPassword = await hash(userData.password, salt);
       const { password, ...data } = userData;

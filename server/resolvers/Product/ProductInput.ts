@@ -18,6 +18,9 @@ export class ProductDataInput {
   description: string;
 
   @Field({ nullable: true })
+  amount?: number;
+
+  @Field({ nullable: true })
   service?: string;
 }
 

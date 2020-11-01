@@ -9,7 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ServiceWhereUniqueData = exports.ServiceData = void 0;
 const type_graphql_1 = require("type-graphql");
+const ProductInput_1 = require("../Product/ProductInput");
 let ServiceData = class ServiceData {
 };
 __decorate([
@@ -29,8 +31,8 @@ __decorate([
     __metadata("design:type", String)
 ], ServiceData.prototype, "type", void 0);
 __decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", String)
+    type_graphql_1.Field(() => [ProductInput_1.ProductDataInput]),
+    __metadata("design:type", Array)
 ], ServiceData.prototype, "products", void 0);
 ServiceData = __decorate([
     type_graphql_1.InputType()

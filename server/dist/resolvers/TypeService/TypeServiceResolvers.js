@@ -21,6 +21,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TypeServiceResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const mongodb_1 = require("mongodb");
 const mongo_1 = require("../../mongo");

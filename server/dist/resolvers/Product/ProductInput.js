@@ -9,29 +9,48 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductWhereServiceData = exports.ProductWhereUniqueData = exports.ProductData = exports.ProductDataInput = void 0;
 const type_graphql_1 = require("type-graphql");
+let ProductDataInput = class ProductDataInput {
+};
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", String)
+], ProductDataInput.prototype, "_id", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], ProductDataInput.prototype, "name", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Number)
+], ProductDataInput.prototype, "stock", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Number)
+], ProductDataInput.prototype, "price", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], ProductDataInput.prototype, "description", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", Number)
+], ProductDataInput.prototype, "amount", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", String)
+], ProductDataInput.prototype, "service", void 0);
+ProductDataInput = __decorate([
+    type_graphql_1.InputType()
+], ProductDataInput);
+exports.ProductDataInput = ProductDataInput;
 let ProductData = class ProductData {
 };
 __decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", String)
-], ProductData.prototype, "name", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", Number)
-], ProductData.prototype, "stock", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", Number)
-], ProductData.prototype, "price", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", String)
-], ProductData.prototype, "description", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", String)
-], ProductData.prototype, "service", void 0);
+    type_graphql_1.Field(() => [ProductDataInput]),
+    __metadata("design:type", Array)
+], ProductData.prototype, "products", void 0);
 ProductData = __decorate([
     type_graphql_1.InputType()
 ], ProductData);
@@ -46,4 +65,14 @@ ProductWhereUniqueData = __decorate([
     type_graphql_1.InputType()
 ], ProductWhereUniqueData);
 exports.ProductWhereUniqueData = ProductWhereUniqueData;
+let ProductWhereServiceData = class ProductWhereServiceData {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], ProductWhereServiceData.prototype, "service", void 0);
+ProductWhereServiceData = __decorate([
+    type_graphql_1.InputType()
+], ProductWhereServiceData);
+exports.ProductWhereServiceData = ProductWhereServiceData;
 //# sourceMappingURL=ProductInput.js.map

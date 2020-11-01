@@ -48,20 +48,25 @@ export class ProductResolver {
     }
   }
 
-  @Mutation(() => Product)
+  @Mutation(() => Boolean)
   async updateProduct(
-    @Arg('where') where: ProductWhereUniqueData,
     @Arg('productData') productData: ProductData
-  ): Promise<Product> {
+  ): Promise<Boolean> {
     try {
-      const product = await db
-        .collection('product')
-        .findOneAndUpdate(
-          { _id: new ObjectID(where._id[0]) },
-          { $set: productData },
-          { returnOriginal: false }
-        );
-      return product.value;
+      productData.products.map(async (value: any) => {
+        const product = {
+          name: value.name,
+          stock: value.stock - value.amount,
+          price: value.price,
+          description: value.description,
+          service: value.service,
+        };
+        await db
+          .collection('product')
+          .updateOne({ _id: new ObjectID(value._id) }, { $set: product });
+      });
+
+      return true;
     } catch (err) {
       throw new Error(err);
     }

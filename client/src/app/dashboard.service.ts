@@ -18,23 +18,14 @@ export class DashboardService {
   services: Service[];
   editableService: Service;
 
-  uploadFile(
-    file: any,
-    username: string,
-    fileType: string
-  ): Observable<UploadTaskSnapshot> {
+  uploadFile(file: any, username: string): Observable<UploadTaskSnapshot> {
     let filePath: string;
-    if (fileType === 'PDF') {
-      filePath = `OrderImages/${username}-${new Date().toISOString()}`;
-    } else if (filePath === 'IMAGE') {
-      filePath = `ProfileImages/${username}-${new Date().toISOString()}`;
-    }
+    filePath = `/ProfileImages/${username}-${new Date().toISOString()}`;
     const fileRef = this.storage.ref(filePath);
     const task = this.storage.upload(filePath, file);
     const url = task.snapshotChanges().pipe(
       finalize(() => {
         return fileRef.getDownloadURL().subscribe((fileUrl) => {
-          console.log(fileUrl);
           return fileUrl;
         });
       })

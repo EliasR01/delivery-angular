@@ -37,6 +37,7 @@ export class UserProfileComponent implements OnInit {
     ]),
     email: new FormControl('', [Validators.required, Validators.email]),
     country: new FormControl('', [Validators.required]),
+    address: new FormControl('', [Validators.required]),
     type: new FormControl('', [Validators.required]),
   });
 
@@ -55,6 +56,7 @@ export class UserProfileComponent implements OnInit {
     this.userForm.controls['country'].setValue(this.service.userData.country);
     this.userForm.controls['type'].setValue(this.service.userData.type);
     this.userForm.controls['file'].setValue(this.service.userData.fileUrl);
+    this.userForm.controls['address'].setValue(this.service.userData.address);
     this.imageUrl = this.userForm.value.file;
   }
 
@@ -70,12 +72,9 @@ export class UserProfileComponent implements OnInit {
 
   update(): void {
     if (this.userForm.value.file != this.service.userData.fileUrl) {
+      this.service.removeFile(this.service.userData.fileUrl);
       this.service
-        .uploadFile(
-          this.userForm.value.file[0],
-          this.service.userData.username,
-          'IMAGE'
-        )
+        .uploadFile(this.userForm.value.file[0], this.service.userData.username)
         .subscribe((e) => {
           e.ref.getDownloadURL().then((value) => {
             this.updateUser(value);
@@ -87,44 +86,36 @@ export class UserProfileComponent implements OnInit {
   }
 
   updateUser(fileUrl: string): void {
-    if (
-      this.userForm.value.currentPassword ===
-      crypto.AES.decrypt(
-        this.service.userData.password,
-        'pa_ssw!=!s3ck7=**=e3ty'
-      ).toString(crypto.enc.Utf8)
-    ) {
-      const { currentPassword, ...filteredData } = this.userForm.value;
-      const { file, ...data } = filteredData;
-      const encryptedPassword = crypto.AES.encrypt(
-        this.userForm.value.password,
-        'pa_ssw!=!s3ck7=**=e3ty'
-      ).toString();
-      const userData = {
-        ...data,
-        password: encryptedPassword,
-        fileUrl: fileUrl,
-      };
-      this.service.removeFile(this.service.userData.fileUrl);
-      this.apollo
-        .mutate<UserDataResponse>({
-          mutation: UPDATE_USER,
-          variables: {
-            where: this.service.userData._id,
-            userData: userData,
-          },
-        })
-        .subscribe((response) => {
-          if (response.data) {
-            this.router.navigate(['dashboard/summary']);
-            this.service.userData = response.data.updateUser;
-          }
-        });
-    } else {
-      this.dialog.open(DialogComponent, {
-        data: 'Current password is not correct!',
+    const { currentPassword, ...filteredData } = this.userForm.value;
+    const { file, ...data } = filteredData;
+    const userData = {
+      ...data,
+      password: this.userForm.value.password,
+      fileUrl: fileUrl,
+    };
+    this.apollo
+      .mutate<UserDataResponse>({
+        mutation: UPDATE_USER,
+        variables: {
+          where: { _id: this.service.userData._id },
+          userData: userData,
+          currentPassword: this.userForm.value.currentPassword,
+        },
+      })
+      .toPromise()
+      .then((response) => {
+        if (response.data) {
+          this.dialog.open(DialogComponent, {
+            data: 'User updated successfully',
+          });
+          this.router.navigate(['dashboard/summary']);
+          this.service.userData = response.data.updateUser;
+        }
+      })
+      .catch((err) => {
+        const error = err.message.split(':')[1];
+        this.dialog.open(DialogComponent, { data: error });
       });
-    }
   }
 
   back(): void {

@@ -8,7 +8,12 @@ import { DELETE_PRODUCT } from '../mutations/deleteProduct';
 import { CREATE_PRODUCT } from '../mutations/createProduct';
 import { TypeService } from '../types';
 import { DialogComponent } from '../dialog/dialog.component';
-import { ServiceDataResponse, ProductDataResponse } from '../interfaces';
+import {
+  ServiceDataResponse,
+  ProductDataResponse,
+  TypeServiceResponse,
+} from '../interfaces';
+import { GET_TYPE_SERVICE } from '../queries/getTypeServices';
 import { MatDialog } from '@angular/material/dialog';
 import { Apollo } from 'apollo-angular';
 import { Product } from '../types';
@@ -236,7 +241,19 @@ export class AddServiceComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.typeServices = this.service.typeService;
+    this.loading = true;
+    this.apollo
+      .query<TypeServiceResponse>({ query: GET_TYPE_SERVICE })
+      .toPromise()
+      .then((res) => {
+        this.typeServices = res.data.getTypeOfService;
+        this.loading = false;
+      })
+      .catch(() => {
+        this.loading = false;
+        this.dialog.open(DialogComponent, { data: '' });
+      });
+
     if (this.service.editableService) {
       this.loading = true;
       this.isEditingService = true;
@@ -279,6 +296,5 @@ export class AddServiceComponent implements OnInit {
     this.loading = false;
     this.resetForm('ProductForm');
     this.resetForm('ServiceForm');
-    console.log(this.products);
   }
 }

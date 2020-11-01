@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Order = void 0;
 const type_graphql_1 = require("type-graphql");
 let Order = class Order {
 };
@@ -47,7 +48,7 @@ __decorate([
 __decorate([
     type_graphql_1.Field(),
     __metadata("design:type", String)
-], Order.prototype, "bussiness", void 0);
+], Order.prototype, "business", void 0);
 Order = __decorate([
     type_graphql_1.ObjectType()
 ], Order);

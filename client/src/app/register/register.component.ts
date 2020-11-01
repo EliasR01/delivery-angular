@@ -64,11 +64,7 @@ export class RegisterComponent implements OnInit {
       this.loading = true;
 
       this.service
-        .uploadFile(
-          this.userForm.value.file[0],
-          this.userForm.value.username,
-          'IMAGE'
-        )
+        .uploadFile(this.userForm.value.file[0], this.userForm.value.username)
         .toPromise()
         .then((e) => {
           this.loading = true;
@@ -95,6 +91,9 @@ export class RegisterComponent implements OnInit {
               .then((response) => {
                 if (response.data) {
                   this.loading = false;
+                  this.dialog.open(DialogComponent, {
+                    data: 'Úser registered successfully',
+                  });
                   this.service.userData = response.data.createUser;
                   this.router.navigate(['dashboard']);
                 }

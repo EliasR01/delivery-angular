@@ -16,6 +16,11 @@ body {
   );
 }
 
+ul,
+div {
+  font-family: Comic Sans MS, Comic Sans, cursive;
+}
+
 //prettier-ignore
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
