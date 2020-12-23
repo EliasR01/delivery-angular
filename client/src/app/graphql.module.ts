@@ -1,16 +1,15 @@
 import { NgModule } from '@angular/core';
-import { APOLLO_OPTIONS, Apollo } from 'apollo-angular';
+import { APOLLO_OPTIONS } from 'apollo-angular';
 import { HttpLinkModule, HttpLink } from 'apollo-angular-link-http';
-import { ApolloLink, from, fromPromise, Observable, concat } from 'apollo-link';
+import { ApolloLink, from } from 'apollo-link';
 import { onError } from 'apollo-link-error';
 import emailjs, { EmailJSResponseStatus } from 'emailjs-com';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { getAccessToken, setAccessToken } from './utils';
-//import { TokenRefreshLink } from 'apollo-link-token-refresh';
-//import jwtDecode from 'jwt-decode';
+import { getAccessToken } from './utils';
 
 export function createApollo(httpLink: HttpLink) {
   const uri = 'http://localhost:4000'; // <-- add the URL of the GraphQL server here
+  // const uri = 'http://172.17.0.2:4000';
   const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (graphQLErrors) {
       for (let err of graphQLErrors) {

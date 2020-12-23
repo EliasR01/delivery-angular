@@ -108,9 +108,13 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     try {
+      console.log(document.cookie);
       const token = document.cookie.split('=')[1];
+      // console.log(`Token: ${token}`);
       const payload = jwt_decode(token);
+      // console.log(`Payload: ${payload}`);
       const userId = payload.userId._id;
+      // console.log(`User ID: ${userId}`);
       this.service.userId = userId;
       if (userId) {
         if (this.service.userData === undefined) {

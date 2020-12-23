@@ -117,7 +117,6 @@ export class SummaryComponent implements OnInit {
     } else {
       this.isBusiness = false;
     }
-
     this.apollo
       .query<OrderDataResponse>({
         query: GET_ORDERS_BY_USER,

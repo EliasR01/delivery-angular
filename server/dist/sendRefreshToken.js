@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendRefreshToken = void 0;
-exports.sendRefreshToken = (res, token) => {
+const sendRefreshToken = (res, token) => {
     let expirationDate = new Date();
     if (token.length > 0) {
         expirationDate = new Date(Date.now() + 1800000);
@@ -12,4 +12,5 @@ exports.sendRefreshToken = (res, token) => {
         expires: expirationDate,
     });
 };
+exports.sendRefreshToken = sendRefreshToken;
 //# sourceMappingURL=sendRefreshToken.js.map

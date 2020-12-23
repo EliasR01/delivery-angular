@@ -9,5 +9,7 @@ export const sendRefreshToken = (res: Response, token: string) => {
     domain: 'localhost',
     path: '/',
     expires: expirationDate,
+    httpOnly: false,
+    secure: false,
   });
 };

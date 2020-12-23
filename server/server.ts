@@ -117,7 +117,7 @@ import * as nodemailer from 'nodemailer';
     });
 
     apolloServer.applyMiddleware({ app, cors: false, path: '/' });
-    app.listen(4000, () => {
+    app.listen(4000, '0.0.0.0', () => {
       console.log('Server started at port 4000');
     });
   } catch (err) {
